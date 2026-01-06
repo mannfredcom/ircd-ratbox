@@ -1,0 +1,269 @@
+/*
+ *  ircd-ratbox: A slightly useful ircd.
+ *  tools.c: Various functions needed here and there.
+ *
+ *  Copyright (C) 1996-2002 Hybrid Development Team
+ *  Copyright (C) 2002-2012 ircd-ratbox development team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
+ *  USA
+ *
+ *  $Id: rb_tools.c 29422 2016-03-25 14:53:20Z androsyn $
+ *
+ *  Here is the original header:
+ *
+ *  Useful stuff, ripped from places ..
+ *  adrian chadd <adrian@creative.net.au>
+ *
+ *  The TOOLS_C define builds versions of the functions in tools.h
+ *  so that they end up in the resulting object files.	If its not
+ *  defined, tools.h will build inlined versions of the functions
+ *  on supported compilers
+ */
+#define _GNU_SOURCE 1
+#include <libratbox_config.h>
+#include <ratbox_lib.h>
+#include <rb_tools.h>
+
+
+/* rb_string_to_array()
+ *   Changes a given buffer into an array of parameters.
+ *   Taken from ircd-ratbox.
+ *
+ * inputs	- string to parse, array to put in
+ * outputs	- number of parameters
+ */
+int
+rb_string_to_array(char *string, char **parv, int maxpara)
+{
+	char *p, *xbuf = string;
+	int x = 0;
+
+	parv[x] = NULL;
+
+	if(string == NULL || string[0] == '\0')
+		return x;
+
+	while(*xbuf == ' ')	/* skip leading spaces */
+		xbuf++;
+	if(*xbuf == '\0')	/* ignore all-space args */
+		return x;
+
+	do
+	{
+		if(*xbuf == ':')	/* Last parameter */
+		{
+			xbuf++;
+			parv[x++] = xbuf;
+			parv[x] = NULL;
+			return x;
+		}
+		else
+		{
+			parv[x++] = xbuf;
+			parv[x] = NULL;
+			if((p = strchr(xbuf, ' ')) != NULL)
+			{
+				*p++ = '\0';
+				xbuf = p;
+			}
+			else
+				return x;
+		}
+		while(*xbuf == ' ')
+			xbuf++;
+		if(*xbuf == '\0')
+			return x;
+	}
+	while(x < maxpara - 1);
+
+	if(*p == ':')
+		p++;
+
+	parv[x++] = p;
+	parv[x] = NULL;
+	return x;
+}
+
+
+
+/* rb_basename
+ *
+ * input	-
+ * output	-
+ * side effects -  
+ */
+char *
+rb_basename(const char *path)
+{
+	const char *s;
+
+	if(!(s = strrchr(path, '/')))
+		s = path;
+	else
+		s++;
+	return rb_strdup(s);
+}
+
+/*
+ * rb_dirname
+ */
+
+char *
+rb_dirname(const char *path)
+{
+	char *s;
+
+	s = strrchr(path, '/');
+	if(s == NULL)
+	{
+		return rb_strdup(".");
+	}
+
+	/* remove extra slashes */
+	while(s > path && *s == '/')
+		--s;
+
+	return rb_strndup(path, ((uintptr_t)s - (uintptr_t)path) + 2);
+}
+
+
+size_t rb_zstring_serialized(rb_zstring_t *zs, void **buf, size_t *buflen)
+{
+        uint8_t *p;
+        size_t alloclen = sizeof(uint16_t) + zs->len;
+
+        p = rb_malloc(sizeof(alloclen));          
+        memcpy(p, &zs->len, sizeof(uint16_t));
+        p += sizeof(uint16_t);
+        memcpy(p, zs->data, zs->len);
+        *buf = (void *)p;
+        return alloclen;
+}
+
+size_t rb_zstring_deserialize(rb_zstring_t *zs, void *buf)
+{
+	uint8_t *p = (uint8_t *)buf;
+
+	memcpy(&zs->len, p, sizeof(uint16_t));
+	p += sizeof(uint16_t);
+	if(zs->len == 0)
+	{
+		zs->data = NULL;
+		return sizeof(uint16_t);
+	}
+	zs->data = rb_malloc(zs->len);
+	memcpy(zs->data, p, zs->len);
+	return zs->len + sizeof(uint16_t);
+}
+
+void rb_zstring_free(rb_zstring_t *zs)
+{
+	rb_free(zs->data);
+	rb_free(zs);
+
+}
+
+rb_zstring_t *rb_zstring_alloc(void)
+{
+	rb_zstring_t *zs = rb_malloc(sizeof(rb_zstring_t));
+	return zs;
+}
+
+rb_zstring_t *rb_zstring_from_c_len(const char *buf, size_t len)
+{
+	rb_zstring_t *zs;
+	
+	if(len > UINT16_MAX-1)
+		return NULL;
+		
+	zs = rb_zstring_alloc();
+	zs->alloclen = zs->len = (uint16_t)len;
+	zs->alloclen = (uint16_t)len;
+	if(zs->alloclen < 128)
+		zs->alloclen = 128;
+	zs->data = rb_malloc(zs->alloclen);
+	memcpy(zs->data, buf, zs->len);
+	return(zs);
+}
+
+rb_zstring_t *rb_zstring_from_c(const char *buf)
+{
+	return rb_zstring_from_c_len(buf, strlen(buf));
+}
+
+size_t rb_zstring_len(rb_zstring_t *zs)
+{
+	return zs->len;
+} 
+
+void rb_zstring_append_from_zstring(rb_zstring_t *dst_zs, rb_zstring_t *src_zs)
+{
+	void *ep;
+	size_t nlen = dst_zs->len + src_zs->len;
+	
+	
+	if(nlen > dst_zs->alloclen)
+	{
+		dst_zs->alloclen += src_zs->len + 64;
+		dst_zs->data = rb_realloc(dst_zs->data, dst_zs->alloclen);
+	}
+
+	ep = dst_zs->data + dst_zs->len;
+	memcpy(ep, src_zs->data, src_zs->len);
+}
+
+void rb_zstring_append_from_c(rb_zstring_t *zs, const char *buf, size_t len)
+{
+	void *ep;
+	size_t nlen = zs->len + len;
+	
+	if(nlen > zs->alloclen)
+	{
+		zs->alloclen += len + 64; 
+		zs->data = rb_realloc(zs->data, zs->alloclen);
+	}
+	ep = zs->data + zs->len;
+	zs->len += len;
+	memcpy(ep, buf, len);
+}
+
+char *rb_zstring_to_c(rb_zstring_t *zs, char *buf, size_t len)
+{
+        size_t cpylen;
+        if(len < zs->len)
+                cpylen = len - 1;
+        else
+                cpylen = zs->len;
+        buf[cpylen] = '\0';
+        memcpy(buf, zs->data, cpylen);
+        return buf;
+}
+
+
+char *rb_zstring_to_c_alloc(rb_zstring_t *zs)
+{
+	char *p;
+	p = rb_malloc(zs->len+1);	
+	memcpy(p, zs->data, zs->len); 
+	return p;
+}
+
+size_t rb_zstring_to_ptr(rb_zstring_t *zs, void **ptr)
+{
+	*ptr = (void *)zs->data;
+	return zs->len;
+} 
+                
