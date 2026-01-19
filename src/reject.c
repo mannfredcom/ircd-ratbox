@@ -289,7 +289,11 @@ remove_reject(const char *ip)
 static void
 delete_ipline(struct ConfItem *aconf, rb_patricia_tree_t * t)
 {
-	rb_patricia_remove(t, aconf->pnode);
+	if(aconf->pnode != NULL)
+	{
+		rb_patricia_remove(t, aconf->pnode);
+		aconf->pnode = NULL;
+	}
 	if(!aconf->clients)
 	{
 		free_conf(aconf);
