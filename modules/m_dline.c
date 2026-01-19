@@ -235,10 +235,12 @@ valid_dline(struct Client *source_p, const char *dlhost)
 {
 	char cidr_form_host[HOSTLEN + 1];
 	int bits;
+	int ty;
 
 	rb_strlcpy(cidr_form_host, dlhost, sizeof(cidr_form_host));
 
-	if(!parse_netmask(dlhost, NULL, &bits))
+	ty = parse_netmask(dlhost, NULL, &bits);
+	if(!ty || ty == HM_HOST)
 	{
 		sendto_one_notice(source_p, ":Invalid D-Line");
 		return 0;
