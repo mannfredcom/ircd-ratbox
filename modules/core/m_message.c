@@ -110,7 +110,7 @@ static int flood_attack_channel(int p_or_n, struct Client *source_p, struct Chan
 static struct Client *find_userhost(const char *, const char *, int *);
 
 
-static struct entity targets[512];
+static struct entity targets[MAX_TARGETS];
 static int ntargets = 0;
 
 static bool duplicate_ptr(void *);
@@ -257,6 +257,8 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 	char *p, *nick, *target_list;
 	struct Channel *chptr = NULL;
 	struct Client *target_p;
+	const int max_targets = (ConfigFileEntry.max_targets > MAX_TARGETS) ?
+		MAX_TARGETS : ConfigFileEntry.max_targets;
 
 	target_list = LOCAL_COPY(nicks_channels);
 
@@ -280,7 +282,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 			{
 				if(!duplicate_ptr(chptr))
 				{
-					if(ntargets >= ConfigFileEntry.max_targets)
+					if(ntargets >= max_targets)
 					{
 						sendto_one_numeric(source_p, s_RPL(ERR_TOOMANYTARGETS), nick);
 						return (1);
@@ -307,7 +309,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 		{
 			if(!duplicate_ptr(target_p))
 			{
-				if(ntargets >= ConfigFileEntry.max_targets)
+				if(ntargets >= max_targets)
 				{
 					sendto_one_numeric(source_p, s_RPL(ERR_TOOMANYTARGETS), nick);
 					return (1);
@@ -362,7 +364,7 @@ build_target_list(int p_or_n, const char *command, struct Client *client_p,
 
 				if(!duplicate_ptr(chptr))
 				{
-					if(ntargets >= ConfigFileEntry.max_targets)
+					if(ntargets >= max_targets)
 					{
 						sendto_one_numeric(source_p, s_RPL(ERR_TOOMANYTARGETS), nick);
 						return (1);
