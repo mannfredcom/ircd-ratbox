@@ -124,7 +124,8 @@ static int
 mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	char nick[NICKLEN];
+	char nick[NICKLEN + 1];
+	size_t nick_size;
 	char *s;
 
 	if(parc < 2 || EmptyString(parv[1]) || (parv[1][0] == '~'))
@@ -141,7 +142,8 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		*s = '\0';
 
 	/* copy the nick and terminate it */
-	rb_strlcpy(nick, parv[1], ServerInfo.nicklen);
+	nick_size = IRCD_MIN(ServerInfo.nicklen, sizeof(nick));
+	rb_strlcpy(nick, parv[1], nick_size);
 
 	/* check the nickname is ok */
 	if(!clean_nick(nick, true))
@@ -181,7 +183,8 @@ static int
 m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
-	char nick[NICKLEN];
+	char nick[NICKLEN + 1];
+	size_t nick_size;
 	char *s;
 
 	if(parc < 2 || EmptyString(parv[1]) || (parv[1][0] == '~'))
@@ -201,8 +204,9 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(!IsFloodDone(source_p))
 		flood_endgrace(source_p);
 
-	/* terminate nick to NICKLEN, we dont want clean_nick() to error! */
-	rb_strlcpy(nick, parv[1], ServerInfo.nicklen);
+	/* terminate nick to configured nicklen */
+	nick_size = IRCD_MIN(ServerInfo.nicklen, sizeof(nick));
+	rb_strlcpy(nick, parv[1], nick_size);
 
 	/* check the nickname is ok */
 	if(!clean_nick(nick, true))
