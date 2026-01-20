@@ -107,12 +107,13 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	const char *name;
 	struct Client *target_p;
 	int hop;
+	size_t name_len;
 
 	name = parv[1];
 	hop = atoi(parv[2]);
 	rb_strlcpy(info, parv[3], sizeof(info));
 
-	size_t name_len = strlen(name);
+	name_len = strlen(name);
 
 	if(name_len > HOSTLEN)
 	{
