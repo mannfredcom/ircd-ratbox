@@ -592,11 +592,14 @@ conn_mod_read_cb(rb_fde_t *fd, void *data)
 		}
 
 
+		/* renegotiation is disabled in libratbox unconditionally, so this code isn't needed anymore  */
+#if 0
 		if((rb_ssl_handshake_count(conn->mod_fd) > 1) && (rb_current_time() - rb_ssl_last_handshake(conn->mod_fd)) < 1200)
 		{
 			close_conn(conn, WAIT_PLAIN, "TLS error: Enjoying shaking my hand off?");
 			return;	
 		}
+#endif
 
 		if(length < 0)
 		{
