@@ -586,8 +586,13 @@ rbl_set_aftype(rbl_t *t, bool isv4, bool isv6)
 {
 	if(isv4 == true)
 		rbl_setv4(t);
-	if(isv4 == true)
+	else
+		rbl_clearv4(t);
+
+	if(isv6 == true)
 		rbl_setv6(t);
+	else
+		rbl_clearv6(t);
 }
 
 rbl_t *
@@ -612,6 +617,7 @@ rbl_set_match_other(rbl_t *t, bool other_reply)
 void
 rbl_add_other_answer(rbl_t *t, const char *reason)
 {
+	rb_free(t->mo_answer);
 	t->mo_answer = rb_strdup(reason);
 	rbl_setmatchother(t); /* make sure this gets done */
 }
@@ -770,6 +776,7 @@ rbl_set_banned(struct AuthRequest *auth, const char *rblname, const char *answer
 	substitution_append_var(&varlist, "host", EmptyString(source_p->host) ? source_p->sockhost : source_p->host);
 	substitution_append_var(&varlist, "dnsbl-host", rblname);
 	substitution_append_var(&varlist, "network-name", ServerInfo.network_name);
+	rb_free(source_p->localClient->rblreason);
 	source_p->localClient->rblreason = rb_strdup(substitution_parse(answer, &varlist));
 	substitution_free(&varlist);
 	SetRBLBanned(source_p);
@@ -860,10 +867,11 @@ rbl_check_rbls(struct AuthRequest *auth)
 		if(safamily == AF_INET && rbl_isv4(t) != true)
 			continue;
 			
+		if(rbl_string((struct sockaddr *)&auth->client->localClient->ip, t->rblname, hostbuf, sizeof(hostbuf)) == NULL)
+			continue;
 
                 query = rb_malloc(sizeof(rblquery_t));
                 query->auth = auth;
-		rbl_string((struct sockaddr *)&auth->client->localClient->ip, t->rblname, hostbuf, sizeof(hostbuf));
                 rbl_attach_rbl_to_query(query, t);
                 rb_dlinkAdd(query, &query->node, &auth->rbl_queries);
 		query->queryid = lookup_hostname(hostbuf, AF_INET, rbl_dns_callback, query);
@@ -914,6 +922,5 @@ rbl_cancel_lookups(struct AuthRequest *auth)
                 rb_free(query);
         } 
 }
-
 
 
