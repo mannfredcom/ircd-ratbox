@@ -889,6 +889,9 @@ chm_ban(struct Client *source_p, struct Channel *chptr,
 	else
 		mask = pretty_mask(raw_mask);
 
+	if(mask == NULL)
+		return;
+
 	/* we'd have problems parsing this, hyb6 does it too */
 	if(strlen(mask) > (MODEBUFLEN - 2))
 		return;
