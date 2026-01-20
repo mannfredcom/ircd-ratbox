@@ -84,7 +84,7 @@
 #endif
 
 
-#define NICKLEN		30+1    /* Make the default 31, NICKLEN buffers 
+#define NICKLEN		(30+1)    /* Make the default 31, NICKLEN buffers 
 				 * are to include the trailing \0
 				 * This makes the functional nicklen max 30
 				 */
@@ -111,7 +111,7 @@
 #define KEYLEN		24
 #define MAXRECIPIENTS	20
 #define MAXBANLENGTH	1024
-#define OPERNICKLEN	NICKLEN*2	/* Length of OPERNICKs. */
+#define OPERNICKLEN	(NICKLEN*2)	/* Length of OPERNICKs. */
 
 #define USERHOST_REPLYLEN	(NICKLEN+HOSTLEN+USERLEN+5)
 #define MAX_DATE_STRING 32	/* maximum string length for a date string */
