@@ -202,28 +202,22 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	}
 
 	host = LOCAL_COPY(aconf->host);
-	remove_dline(aconf);
-
-	if(!(aconf->flags & CONF_FLAGS_TEMPORARY))
+	if(aconf->flags & CONF_FLAGS_TEMPORARY)
 	{
-		bandb_del(BANDB_DLINE, host, NULL);
-
-		sendto_one_notice(source_p, ":D-Line for [%s] is removed", host);
-		sendto_realops_flags(UMODE_ALL, L_ALL, "%s has removed the D-Line for: [%s]",
-				     get_oper_name(source_p), host);
-
-	}
-	else
-	{
-		rb_dlink_list *list;
-		list = &temp_dlines[aconf->port];
-		rb_dlinkFindDestroy(aconf, list);
+    rb_dlinkFindDestroy(aconf, &temp_dlines[aconf->port]);
+    remove_dline(aconf);
 		sendto_one_notice(source_p, ":Un-dlined [%s] from temporary D-lines", host);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "%s has removed the temporary D-Line for: [%s]",
 				     get_oper_name(source_p), host);
 		return 0;
 	}
+
+  remove_dline(aconf);
+  bandb_del(BANDB_DLINE, host, NULL);
+  sendto_one_notice(source_p, ":D-Line for [%s] is removed", host);
+  sendto_realops_flags(UMODE_ALL, L_ALL, "%s has removed the D-Line for: [%s]",
+                       get_oper_name(source_p), host);
 
 	ilog(L_KLINE, "UD %s %s", get_oper_name(source_p), host);
 
