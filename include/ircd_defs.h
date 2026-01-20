@@ -84,7 +84,7 @@
 #endif
 
 
-#define NICKLEN		30+1    /* Make the default 31, NICKLEN buffers 
+#define NICKLEN		(30+1)    /* Make the default 31, NICKLEN buffers 
 				 * are to include the trailing \0
 				 * This makes the functional nicklen max 30
 				 */
