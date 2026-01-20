@@ -133,6 +133,7 @@ rb_ssl_timeout(rb_fde_t *F, void *notused)
 static void
 rb_ssl_info_callback(SSL * ssl, int where, int ret)
 {
+	/* this shouldn't happen anymore with renegotiation disabled */
 	if(where & SSL_CB_HANDSHAKE_START)
 	{
 		rb_fde_t *F = SSL_get_ex_data(ssl, libratbox_index);
@@ -369,8 +370,12 @@ rb_init_ssl(void)
 {
 	int ret = 1;
 	char libratbox_data[] = "libratbox data";
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	SSL_load_error_strings();
 	SSL_library_init();
+#else
+	OPENSSL_init_ssl(0, NULL);
+#endif
 	libratbox_index = SSL_get_ex_new_index(0, libratbox_data, NULL, NULL, NULL);
 
 	return ret;
@@ -405,7 +410,7 @@ rb_setup_ssl_client(const char *ssl_cipher_list, const char *cert, const char *k
 	
 	sctx = rb_malloc(sizeof(rb_ssl_ctx));	
 	sctx->refcount = 1;
-        sctx->ssl_ctx = SSL_CTX_new(SSLv23_client_method());
+        sctx->ssl_ctx = SSL_CTX_new(TLS_client_method());
         
         SSL_CTX_set_options(sctx->ssl_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_COMPRESSION);
         if(sctx->ssl_ctx == NULL)
@@ -458,7 +463,7 @@ rb_setup_ssl_server(const char *cacert, const char *cert, const char *keyfile, c
 	long tls_opts;
 	sctx = rb_malloc(sizeof(rb_ssl_ctx));
 	sctx->refcount = 1;
-	sctx->ssl_ctx = SSL_CTX_new(SSLv23_server_method());
+	sctx->ssl_ctx = SSL_CTX_new(TLS_server_method());
 	if(sctx->ssl_ctx == NULL)
 	{
 		rb_lib_log("rb_init_openssl: Unable to initialize OpenSSL server context: %s",
@@ -555,7 +560,7 @@ rb_setup_ssl_server(const char *cacert, const char *cert, const char *keyfile, c
 		goto cleanup;;
 	}
 
-
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 	if(dhfile != NULL)
 	{
 		/* DH parameters aren't necessary, but they are nice..if they didn't pass one..that is their problem */
@@ -588,9 +593,13 @@ rb_setup_ssl_server(const char *cacert, const char *cert, const char *keyfile, c
 				   dhfile, ERR_error_string(err, NULL));
 			goto cleanup;	  
 		}
-	}
+	} 
+#else
+	SSL_CTX_set_dh_auto(sctx->ssl_ctx, 1);
+#endif
+	
 
-#if OPENSSL_VERSION_NUMBER >= 0x0090800fL
+#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && (OPENSSL_VERSION_NUMBER < 0x30000000L)
 #ifndef OPENSSL_NO_ECDH
 	
 	if(named_curve != NULL)
@@ -848,11 +857,16 @@ rb_get_random(void *buf, size_t length)
 int
 rb_get_pseudo_random(void *buf, size_t length)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	int ret;
 	ret = RAND_pseudo_bytes(buf, (int)length);
+	
 	if(ret < 0)
 		return 0;
 	return 1;
+#else
+	return rb_get_random(buf, length);
+#endif
 }
 
 const char *
@@ -900,11 +914,20 @@ rb_supports_ssl(void)
 	return true;
 }
 
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+# define rb_ssl_version_num() (long)SSLeay()
+# define rb_ssl_version_str() SSLeay_version(SSLEAY_VERSION)
+#else
+# define rb_ssl_version_num() (long)OpenSSL_version_num()
+# define rb_ssl_version_str() OpenSSL_version(OPENSSL_VERSION)
+#endif
+
 void
 rb_get_ssl_info(char *buf, size_t len)
 {
 	snprintf(buf, len, "Using SSL: %s compiled: 0x%lx, library 0x%lx",
-		 SSLeay_version(SSLEAY_VERSION), (long)OPENSSL_VERSION_NUMBER, SSLeay());
+		 rb_ssl_version_str(), (long)OPENSSL_VERSION_NUMBER, rb_ssl_version_num());
 }
 
 #endif /* HAVE_OPESSL */
