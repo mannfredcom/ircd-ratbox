@@ -84,7 +84,10 @@
 #endif
 
 
-#define NICKLEN		30
+#define NICKLEN		30+1    /* Make the default 31, NICKLEN buffers 
+				 * are to include the trailing \0
+				 * This makes the functional nicklen max 30
+				 */
 #define DEFAULT_NICKLEN 9
 #define HOSTLEN		63	/* Length of hostname.	Updated to	   */
 				/* comply with RFC1123			   */
