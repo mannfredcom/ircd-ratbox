@@ -468,8 +468,9 @@ rb_setup_ssl_server(const char *cacert, const char *cert, const char *keyfile, c
 	}
 
 	tls_opts = SSL_CTX_get_options(sctx->ssl_ctx);
+
 	/* Disable SSLv2, make the client use our settings */
-	tls_opts |= SSL_OP_NO_SSLv2 | SSL_OP_NO_COMPRESSION | SSL_OP_CIPHER_SERVER_PREFERENCE | SSL_OP_NO_RENEGOTATION;
+	tls_opts |= SSL_OP_NO_SSLv2 | SSL_OP_NO_COMPRESSION | SSL_OP_CIPHER_SERVER_PREFERENCE | SSL_OP_NO_RENEGOTIATION;
 	switch(tls_min_ver)
 	{
 		case RB_TLS_VER_SSL3: /* we default to SSLv3..sadly */
