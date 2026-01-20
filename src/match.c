@@ -380,7 +380,7 @@ match_ips(const char *s1, const char *s2)
 	*len++ = '\0';
 
 	cidrlen = atoi(len);
-	if(cidrlen <= 0)
+	if(cidrlen < 0)
 		return 0;
 
 #ifdef RB_IPV6
@@ -410,6 +410,8 @@ match_ips(const char *s1, const char *s2)
 		return 0;
 	if(rb_inet_pton(aftype, mask, maskptr) <= 0)
 		return 0;
+	if(cidrlen == 0)
+		return 1;
 	if(comp_with_mask(ipptr, maskptr, cidrlen))
 		return 1;
 	else
