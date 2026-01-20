@@ -1752,6 +1752,21 @@ conf_set_general_hide_error_messages(confentry_t * entry, conf_t * conf, struct 
 }
 
 static void
+conf_set_general_max_targets(confentry_t * entry, conf_t * conf, struct conf_items *item)
+{
+	int max_targets = entry->number;
+
+	if(max_targets > MAX_TARGETS)
+	{
+		conf_report_warning_nl("general::max_targets %d at %s:%d exceeds maximum %d; clamping.",
+				       max_targets, entry->filename, entry->line, MAX_TARGETS);
+		max_targets = MAX_TARGETS;
+	}
+
+	ConfigFileEntry.max_targets = max_targets;
+}
+
+static void
 conf_set_general_oper_only_umodes(confentry_t * entry, conf_t * conf, struct conf_items *item)
 {
 	set_modes_from_table(&ConfigFileEntry.oper_only_umodes, "umode", umode_table, entry);
@@ -2617,7 +2632,7 @@ static struct conf_items conf_general_table[] =
 	{ "max_monitor",	CF_INT,	  NULL, 0, &ConfigFileEntry.max_monitor		},
 	{ "max_nick_time",	CF_TIME,  NULL, 0, &ConfigFileEntry.max_nick_time	},
 	{ "max_nick_changes",	CF_INT,	  NULL, 0, &ConfigFileEntry.max_nick_changes	},
-	{ "max_targets",	CF_INT,	  NULL, 0, &ConfigFileEntry.max_targets		},
+	{ "max_targets",	CF_INT,	  conf_set_general_max_targets, 0, NULL		},
 	{ "min_nonwildcard",	CF_INT,	  NULL, 0, &ConfigFileEntry.min_nonwildcard	},
 	{ "nick_delay",		CF_TIME,  NULL, 0, &ConfigFileEntry.nick_delay		},
 	{ "no_oper_flood",	CF_YESNO, NULL, 0, &ConfigFileEntry.no_oper_flood	},
