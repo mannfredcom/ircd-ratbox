@@ -1359,12 +1359,17 @@ stats_memory(struct Client *source_p)
 	sendto_one_numeric(source_p, RPL_STATSDEBUG,
 			   "z :TOTAL: %zu Available:  Current max RSS: %" PRIuPTR,
 			   total_memory, get_maxrss());
+#ifdef HAVE_STRUCT_MALLINFO2
+	struct mallinfo2 mi;
+	mi = mallinfo2();
+	sendto_one_numeric(source_p, RPL_STATSDEBUG, "z :Malloc allocated: %zu free: %zu arena: %zu mmap blocks: %zu mmap bytes: %zu", mi.uordblks, mi.fordblks, mi.arena, mi.hblks, mi.hblkhd);
+#else
 #ifdef HAVE_STRUCT_MALLINFO
 	struct mallinfo mi;
 	mi = mallinfo();
 	sendto_one_numeric(source_p, RPL_STATSDEBUG, "z :Malloc allocated: %i free: %i arena: %i mmap blocks: %i mmap bytes: %i", mi.uordblks, mi.fordblks, mi.arena, mi.hblks, mi.hblkhd);
 #endif
-
+#endif
 
 }
 

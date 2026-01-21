@@ -302,12 +302,19 @@ if test "x$with_jemalloc" = "xyes";then
 	ac_cv_type_struct_mallinfo=no
 else
 	AC_CHECK_TYPES([struct mallinfo],,, [#include <malloc.h>])
+	AC_CHECK_TYPES([struct mallinfo2],,, [#include <malloc.h>])
 fi
 
 if test "$ac_cv_type_struct_mallinfo" = yes; then
   AC_SUBST(ac_cv_have_struct_mallinfo, 1)  
 else
   AC_SUBST(ac_cv_have_struct_mallinfo, 0)
+fi
+
+if test "$ac_cv_type_struct_mallinfo2" = yes; then
+  AC_SUBST(ac_cv_have_struct_mallinfo2, 1)
+else
+  AC_SUBST(ac_cv_have_struct_mallinfo2, 0)
 fi
 
 
