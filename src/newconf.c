@@ -245,7 +245,7 @@ conf_report_error_nl(const char *fmt, ...)
 	vsnprintf(msg, sizeof(msg), fmt, ap);
 	va_end(ap);
 
-	conf_parse_failure++;
+	conf_parse_failure = true;
 	if(testing_conf == true)
 	{
 		fprintf(stderr, "ERROR: %s\n", msg);
@@ -495,7 +495,7 @@ yyerror(const char *msg)
 	char newlinebuf[IRCD_BUFSIZE];
 
 	strip_tabs(newlinebuf, yy_linebuf, sizeof(newlinebuf));
-	conf_parse_failure++;
+	conf_parse_failure = true;
 
 	if(testing_conf == true)
 	{
@@ -542,7 +542,7 @@ conf_report_error(const char *fmt, ...)
 	vsnprintf(msg, sizeof(msg), fmt, ap);
 	va_end(ap);
 
-	conf_parse_failure++;
+	conf_parse_failure = true;
 	if(testing_conf == true)
 	{
 		fprintf(stderr, "\"%s\", line %d: %s\n", current_file, lineno + 1, msg);
@@ -677,7 +677,7 @@ conf_call_set(char *item, conf_parm_t * value, int type)
 int
 read_config_file(const char *filename)
 {
-	conf_parse_failure = 0;
+	conf_parse_failure = false;
 	delete_all_conf();
 	rb_strlcpy(conffilebuf, filename, sizeof(conffilebuf));
 	if((conf_fbfile_in = fopen(filename, "r")) == NULL)
