@@ -2,7 +2,7 @@
  *  libratbox: a library used by ircd-ratbox and other things
  *  openssl.c: openssl related code
  *
- *  Copyright (C) 2007-2012 ircd-ratbox development team
+ *  Copyright (C) 2007-2026 ircd-ratbox development team
  *  Copyright (C) 2007-2008 Aaron Sethman <androsyn@ratbox.org>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -19,8 +19,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
- *
- *  $Id: openssl.c 29281 2016-01-13 15:36:29Z androsyn $
  */
 
 #include <libratbox_config.h>

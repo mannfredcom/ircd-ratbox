@@ -27,13 +27,11 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- *  $Id: supported.c 3568 2007-09-09 18:59:08Z jilles $
  */
 
 /* From the old supported.h which is
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2012 ircd-ratbox development team
+ *  Copyright (C) 2002-2026 ircd-ratbox development team
  */
 /*
  * - from mirc's versions.txt

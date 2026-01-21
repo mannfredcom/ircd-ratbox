@@ -3,7 +3,7 @@
  *  m_unreject.c: Removes an ip from the reject cache
  *
  *  Copyright (C) 2004 Aaron Sethman <androsyn@ratbox.org>
- *  Copyright (C) 2004-2012 ircd-ratbox development team
+ *  Copyright (C) 2004-2026 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +19,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
- *
- *  $Id$
  */
 
 #include <stdinc.h>

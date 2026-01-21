@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# $Id$ 
 
 spitshell=cat
 package=ircd-ratbox

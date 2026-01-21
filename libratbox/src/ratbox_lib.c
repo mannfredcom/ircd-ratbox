@@ -2,7 +2,7 @@
  *  ircd-ratbox: A slightly useful ircd.
  *  ratbox_lib.c: libircd initialization functions at the like
  *
- *  Copyright (C) 2005,2006 ircd-ratbox development team
+ *  Copyright (C) 2005,2006,2026 ircd-ratbox development team
  *  Copyright (C) 2005,2006 Aaron Sethman <androsyn@ratbox.org>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -19,8 +19,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
- *
- *  $Id: ratbox_lib.c 28631 2015-08-21 02:35:07Z androsyn $
  */
 
 #include <libratbox_config.h>

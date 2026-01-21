@@ -18,8 +18,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
- *
- *  $Id: rb_helper.h 28155 2015-07-10 02:51:09Z androsyn $
  */
 
 #ifndef RB_LIB_H

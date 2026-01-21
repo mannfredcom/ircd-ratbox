@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id$
 SHELL="@SHELL@"
 CP="@INSTALL@"
 top_builddir="@top_builddir@"

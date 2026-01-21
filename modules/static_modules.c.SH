@@ -1,7 +1,5 @@
 #!/bin/sh
 # static_modules.c.SH: Generates our static module list
-# $Id: static_modules.c.SH 21564 2006-01-04 19:42:17Z leeh $
-#
 SYMS=`for x in $*; do basename $x .c; done`
 cat > static_modules.c <<EOF
 /*
@@ -9,7 +7,7 @@ cat > static_modules.c <<EOF
  *  ircd-ratbox: A slightly useful ircd
  *
  *  Copyright (C) 2003,2008 Aaron Sethman <androsyn@ratbox.org>
- *  Copyright (C) 2003-2005,2008 ircd-ratbox development team
+ *  Copyright (C) 2003-2005,2008,2026 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

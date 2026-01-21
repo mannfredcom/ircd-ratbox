@@ -1,4 +1,4 @@
-dnl $Id$
+dnl 
 dnl Process this file with autoconf to produce a configure script.
 
 dnl TODO: clean up all the OpenSSL and shared module checking stuff;
@@ -9,7 +9,7 @@ AC_PREREQ(2.63)
 AUTOMAKE_OPTIONS = 1.10
 
 dnl Sneaky way to get an Id tag into the configure script
-AC_COPYRIGHT([$Id$])
+AC_COPYRIGHT([])
 AC_INIT([ircd-ratbox],[devel])
 AC_CONFIG_AUX_DIR([libltdl/config])
 AC_CONFIG_MACRO_DIR([libltdl/m4])
@@ -626,4 +626,3 @@ echo "Modules ........................ $tmpresult"
 echo "Assert debugging ............... $assert"
 echo "ratbox-services compatibility .. $ratbox_services"
 echo
-

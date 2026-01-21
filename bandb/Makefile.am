@@ -1,6 +1,3 @@
-#
-# $Id$
-#
 AUTOMAKE_OPTIONS = foreign subdir-objects
 
 if BUILD_SQLITE

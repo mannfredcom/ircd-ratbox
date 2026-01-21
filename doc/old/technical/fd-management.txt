@@ -1,7 +1,6 @@
 Overview of the filedescriptor subsystem
 Adrian Chadd <adrian@creative.net.au>
 
-$Id$
 
 
 Filedescriptor lists

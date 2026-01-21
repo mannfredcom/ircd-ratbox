@@ -4,7 +4,7 @@
  *		  PRIVMSG/NOTICE implementations.
  *
  *  Copyright (C) 2005 Lee Hardy <lee -at- leeh.co.uk>
- *  Copyright (C) 2005-2012 ircd-ratbox development team
+ *  Copyright (C) 2005-2026 ircd-ratbox development team
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
@@ -29,8 +29,6 @@
  *  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
  *  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
- *
- *  $Id$
  */
 #include <stdinc.h>
 #include <struct.h>

@@ -1,12 +1,10 @@
 /*
  *  m_mkpasswd.c: Encrypts a password online, DES or MD5.
  *
- *  Copyright 2002 W. Campbell and the ircd-ratbox development team
+ *  Copyright 2002-2026 W. Campbell and the ircd-ratbox development team
  *  Based on mkpasswd.c, originally by Nelson Minar (minar@reed.edu)
  *
  *  You can use this code in any way as long as these names remain.
- *
- *  $Id$
  */
 
 /* List of ircd includes from ../include/ */

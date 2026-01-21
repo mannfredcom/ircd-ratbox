@@ -2,7 +2,6 @@
  * crypt.c: Implements unix style crypt() for platforms that don't have it
  *	    This version has both an md5 and des crypt.
  *	    This was pretty much catted together from uclibc.
- * $Id: crypt.c 28579 2015-08-13 17:26:17Z androsyn $
  */
 
 /*

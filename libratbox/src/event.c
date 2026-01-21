@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1998-2000 Regents of the University of California
  *  Copyright (C) 2001-2002 Hybrid Development Team
- *  Copyright (C) 2002-2012 ircd-ratbox development team
+ *  Copyright (C) 2002-2026 ircd-ratbox development team
  *
  *  Code borrowed from the squid web cache by Adrian Chadd.
  *  Original header:
@@ -38,8 +38,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
- *
- *  $Id: event.c 29181 2015-12-04 19:25:31Z androsyn $
  */
 
 #include <libratbox_config.h>

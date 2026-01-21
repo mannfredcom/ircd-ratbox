@@ -16,14 +16,11 @@
 #    http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 #
 #    Copyright (c) 1995-2004 SUSE Linux AG, Nuernberg, Germany.
-#    Copyright (c) 2016 ircd-ratbox development team.
+#    Copyright (c) 2016-2026 ircd-ratbox development team.
 #    All rights reserved.
 #
 #    Original Author: Kurt Garloff
 #    Modified by: Dan Reidy <dubkat@ratbox.org>
-#
-#    $Id$
-#
 # /etc/init.d/ircd-ratbox
 #   and its symbolic link
 # /(usr/)sbin/rcircd-ratbox

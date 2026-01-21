@@ -1,4 +1,4 @@
-dnl $Id: configure.ac 29205 2015-12-09 20:08:43Z androsyn $
+dnl 
 dnl Process this file with autoconf to produce a configure script.
 
 dnl TODO: clean up all the OpenSSL and shared module checking stuff;

@@ -1,6 +1,6 @@
 /*   contrib/m_opme.c
  *   Copyright (C) 2002 Hybrid Development Team
- *   Copyright (C) 2004-2012 ircd-ratbox development team
+ *   Copyright (C) 2004-2026 ircd-ratbox development team
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *   $Id$
  */
 #include <stdinc.h>
 #include <ratbox_lib.h>

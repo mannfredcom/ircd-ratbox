@@ -1,8 +1,7 @@
 #!/bin/sh
 #
 # IRCD-RATBOX Crontab Script
-# Copyright (C) 2009-2012 ircd-ratbox development team
-# $Id$
+# Copyright (C) 2009-2026 ircd-ratbox development team
 
 # You will want to change this to the root directory your IRCD runs from
 IRCD_PATH="/home/user/ircd-ratbox"

@@ -1,8 +1,6 @@
 /* 
  *  ircd-ratbox: A slightly useful ircd
  *  operhash.h: irc operator hash  
- *
- *  $Id$
  */
 
 #ifndef INCLUDED_operhash_h

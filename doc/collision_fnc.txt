@@ -46,4 +46,3 @@ change further). If the SAVETS_100 capab is not present, this document leaves
 the TS of the UID nick undefined; warnings will be given about this.
 
 -- 
-$Id$

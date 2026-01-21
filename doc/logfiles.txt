@@ -1,5 +1,4 @@
 ircd-ratbox logfiles - Lee H <lee -at- leeh.co.uk>
-$Id$
 ---------------------------
 
 fname_killlog

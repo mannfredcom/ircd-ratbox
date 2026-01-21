@@ -4,7 +4,7 @@
  * ircd-ratbox related changes are as follows
  * 
  * Copyright (C) 2008 Aaron Sethman <androsyn@ratbox.org>
- * Copyright (C) 2008-2012 ircd-ratbox development team
+ * Copyright (C) 2008-2026 ircd-ratbox development team
  * 
  * pretty much all of this was yanked from c-ares ares_init.c here is the original 
  * header from there --

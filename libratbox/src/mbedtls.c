@@ -2,7 +2,7 @@
  *  libratbox: a library used by ircd-ratbox and other things
  *  mbedtls.c: mbedtls related code
  *
- *  Copyright (C) 2007-2008 ircd-ratbox development team
+ *  Copyright (C) 2007-2026 ircd-ratbox development team
  *  Copyright (C) 2007-2008 Aaron Sethman <androsyn@ratbox.org>
  *  Copyright (C) 2015 William Pitcock <nenolod@dereferenced.org>
  *
@@ -20,8 +20,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
- *
- *  $Id: mbedtls.c 29261 2015-12-18 18:05:36Z androsyn $
  */
 
 #include <libratbox_config.h>

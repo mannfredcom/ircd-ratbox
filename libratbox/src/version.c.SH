@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# $Id: version.c.SH 24870 2008-01-10 16:51:01Z androsyn $ 
 
 spitshell=cat
 package=libratbox
@@ -31,7 +30,7 @@ $spitshell >version.c <<!SUB!THIS!
  *   src/version.c
  *   
  *   Copyright (C) 1990 Chelsea Ashley Dyerman
- *   Copyright (C) 2008-2012 ircd-ratbox development team
+ *   Copyright (C) 2008-2026 ircd-ratbox development team
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by

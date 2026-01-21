@@ -1,8 +1,6 @@
 /*
  * Copyright (C) 2004-2005 Lee Hardy <lee -at- leeh.co.uk>
- * Copyright (C) 2004-2012 ircd-ratbox development team
- *
- * $Id$
+ * Copyright (C) 2004-2026 ircd-ratbox development team
  */
 #ifndef INCLUDED_HOOK_H
 #define INCLUDED_HOOK_H

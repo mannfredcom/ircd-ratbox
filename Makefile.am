@@ -1,5 +1,3 @@
-# $Id$
-# 
 # okay so i've flattened out the build stuff here.
 # this is really for the best since so many things depend
 # on each other now..

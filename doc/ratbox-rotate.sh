@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #  ratbox-rotate.sh - Rotate your IRCD's logs
-#  Copyleft (C) 2016 ircd-ratbox development team.
+#  Copyleft (C) 2016-2026 ircd-ratbox development team.
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,6 @@
 #  You should have received a copy of the GNU General Public License along
 #  with this program; if not, write to the Free Software Foundation, Inc.,
 #  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-#
-# $Id$
 ###
 
 # run: crontab -e

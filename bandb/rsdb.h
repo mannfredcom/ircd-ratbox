@@ -1,4 +1,4 @@
-/* $Id$ */
+/*  */
 #ifndef INCLUDED_rsdb_h
 #define INCLUDED_rsdb_h
 

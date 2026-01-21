@@ -1,7 +1,5 @@
 /*
  * include/irc_reslib.h
- *
- * $Id$
  */
 
 #ifndef _CHARYBDIS_RESLIB_H

@@ -1,4 +1,4 @@
-/* $Id$ */
+/*  */
 #ifndef INCLUDED_CACHE_H
 #define INCLUDED_CACHE_H
 

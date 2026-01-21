@@ -16,8 +16,6 @@
 
 #
 # Makefile.am: stuff for automake to vomit back up in a digested form
-# $Id: Makefile.am 29083 2015-11-17 18:51:40Z androsyn $ 
-#
 
 VPATH = @srcdir@
 am__is_gnu_make = { \

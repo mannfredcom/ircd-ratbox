@@ -1,8 +1,6 @@
 /* 
  *  ircd-ratbox: A slightly useful ircd
  *  bandbi.h: bandb related stuff
- * 
- *  $Id$
  */
 
 #ifndef INCLUDED_bandbi_h

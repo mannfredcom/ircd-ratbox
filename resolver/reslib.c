@@ -104,7 +104,7 @@ extern const char * get_windows_nameservers(void);
 #define DNS_LABELTYPE_BITSTRING 0x41
 #define DNS_MAXLINE 128
 
-/* $Id$ */
+/*  */
 /* from Hybrid Id: reslib.c 177 2005-10-22 09:05:05Z michael $ */
 
 struct rb_sockaddr_storage irc_nsaddr_list[IRCD_MAXNS];

@@ -2,7 +2,6 @@
  *   Copyright (C) infinity-infinity God <God@Heaven>
  *
  *   Bob was here 
- *   $Id$
  */
 
 #include <stdinc.h>

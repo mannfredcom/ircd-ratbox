@@ -11,9 +11,7 @@
 # with ircd-ratbox-2.1.x.
 # 
 # Copyright (C) 2005 Lee Hardy <lee -at- leeh.co.uk>
-# Copyright (C) 2005-2012 ircd-ratbox development team
-#
-# $Id: ircd-shortcut.pl 20411 2005-05-18 14:31:19Z leeh $
+# Copyright (C) 2005-2026 ircd-ratbox development team
 
 #####################################
 ##### -- BEGIN CONFIGURATION -- #####
@@ -43,7 +41,7 @@ print FILE <<".EOF.";
  *   Contains the code for command shortcuts for ratbox-services
  *
  * Copyright (C) 2005 Lee Hardy <lee -at- leeh.co.uk>
- * Copyright (C) 2005-2012 ircd-ratbox development team
+ * Copyright (C) 2005-2026 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

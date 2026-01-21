@@ -130,4 +130,3 @@ This code should compile without any warnings on:
 - Other files recommended for reading: BUGS, INSTALL
 
 --------------------------------------------------------------------------------
-`$Id$`

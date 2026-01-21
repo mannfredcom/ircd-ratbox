@@ -2,11 +2,8 @@
  * res.c: resolver related code
  *
  * Portions are:
- * Copyright (C) 2008-2012 ircd-ratbox development team
+ * Copyright (C) 2008-2026 ircd-ratbox development team
  * Copyright (C) 2005,2008 Aaron Sethman <androsyn@ratbox.org>
- *
- * $Id$
- * 
  * This is base on the resolver from charybdis, which in turn is based on the
  * resolver from hybrid.  
  *

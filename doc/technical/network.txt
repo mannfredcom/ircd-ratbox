@@ -1,7 +1,6 @@
 Overview of the network subsystem
 Adrian Chadd <adrian@creative.net.au>
 
-$Id$
 
 
 This document is an overview of the new and hopefully improved network

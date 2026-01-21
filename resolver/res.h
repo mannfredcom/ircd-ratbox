@@ -1,7 +1,5 @@
 /*
  * res.h for referencing functions in res.c, reslib.c
- *
- * $Id$
  */
 
 #ifndef _RATBOX_RES_H

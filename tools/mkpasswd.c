@@ -9,7 +9,7 @@
 ** /dev/random for salt generation added by 
 ** Aaron Sethman <androsyn@ratbox.org>
 **
-** $Id$
+** 
 */
 #include <stdio.h>
 #include <string.h>

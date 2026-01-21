@@ -16,8 +16,6 @@
 
 #
 # Makefile.am: stuff for automake to vomit back up in a digested form
-# $Id: Makefile.in 29169 2015-12-04 16:38:23Z androsyn $ 
-#
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \

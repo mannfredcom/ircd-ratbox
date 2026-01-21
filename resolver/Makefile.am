@@ -1,6 +1,3 @@
-#
-# $Id: Makefile.am 24471 2007-11-07 02:25:56Z androsyn $
-#
 libexec_PROGRAMS = resolver
 
 AM_CPPFLAGS = -I../include -I. -I../libratbox/include 

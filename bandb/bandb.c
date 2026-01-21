@@ -1,7 +1,7 @@
 /* bandb/bandb.c
  *
  * Copyright (C) 2006 Lee Hardy <lee -at- leeh.co.uk>
- * Copyright (C) 2006-2012 ircd-ratbox development team
+ * Copyright (C) 2006-2026 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -26,8 +26,6 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * $Id$
  */
 #include "setup.h"
 #include <ratbox_lib.h>
@@ -274,7 +272,7 @@ main(int argc, char *argv[])
 		fprintf(stderr,
 			"This is ircd-ratbox bandb.  You aren't supposed to run me directly. Maybe you want bantool?\n");
 		fprintf(stderr,
-			"However I will print my Id tag $Id$\n");
+			"However I will print my Id tag\n");
 		fprintf(stderr, "Have a nice day\n");
 		exit(1);
 	}

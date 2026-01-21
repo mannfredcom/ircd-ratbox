@@ -2,7 +2,7 @@
  *  ircd-ratbox: A slightly useful ircd.
  *  event-int.h: internal structs for events
  *
- *  Copyright (C) 2007-2012 ircd-ratbox development team
+ *  Copyright (C) 2007-2026 ircd-ratbox development team
  *  Copyright (C) 2007 Aaron Sethman <androsyn@ratbox.org>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -19,8 +19,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
- *
- *  $Id: event-int.h 28067 2015-05-12 18:04:29Z androsyn $
  */
 
 struct _rb_ev_entry

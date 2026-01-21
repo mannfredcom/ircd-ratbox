@@ -290,4 +290,3 @@ send_message()
 
 -- Diane Bruce 
 
-$Id$

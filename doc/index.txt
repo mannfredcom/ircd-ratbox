@@ -1,5 +1,4 @@
 
-# $Id$
 Here is the overview of the documents in the doc/ directory.
 
 old/CIDR.txt		- Description of CIDR in IPv4

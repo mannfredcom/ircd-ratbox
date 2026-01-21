@@ -4,10 +4,8 @@
  * and ircd-ratbox itself and who knows what else
  *
  * Copyright (C) 2003-2005 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2003-2012 ircd-ratbox development team
+ * Copyright (C) 2003-2026 ircd-ratbox development team
  * Copyright (C) 2005-2008 Aaron Sethman <androsyn@ratbox.org>
- *
- * $Id$
  */
 
 #define READBUF_SIZE	16384
@@ -415,8 +413,6 @@ main(int argc, char **argv)
 	{
 		fprintf(stderr,
 			"This is ircd-ratbox resolver.	You know you aren't supposed to run me directly?\n");
-		fprintf(stderr,
-			"You get an Id tag for this: $Id$\n");
 		fprintf(stderr, "Bleep blorp.\n");
 		exit(1);
 	}

@@ -1,4 +1,3 @@
-# $Id$ 
 
 bin_PROGRAMS = ratbox-mkpasswd
 AM_CFLAGS=$(WARNFLAGS)

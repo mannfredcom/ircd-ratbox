@@ -1,6 +1,3 @@
-#
-# $Id$
-#
 libexec_PROGRAMS = ssld
 AM_CFLAGS=$(WARNFLAGS)
 

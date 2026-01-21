@@ -137,4 +137,3 @@ We hope that these goals are obtained.
 
 --
 W. Campbell
-$Id$

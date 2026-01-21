@@ -1,5 +1,4 @@
 /*
- * $Id: rb_patricia.h 28211 2015-07-10 17:52:58Z androsyn $
  * Dave Plonka <plonka@doit.wisc.edu>
  *
  * This product includes software developed by the University of Michigan,

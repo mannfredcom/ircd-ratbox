@@ -397,9 +397,6 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
-#
-# $Id$
-#
 AUTOMAKE_OPTIONS = foreign subdir-objects
 @BUILD_SQLITE_TRUE@SUBDIRS = sqlite3
 @BUILD_SQLITE_TRUE@@sqlite3_CFLAGS@ = "-Isqlite3"

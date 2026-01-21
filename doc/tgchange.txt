@@ -35,4 +35,3 @@ channel.  See /quote help cnotice and /quote help cprivmsg for more
 information.
 
 -- 
-$Id$

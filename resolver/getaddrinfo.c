@@ -30,7 +30,7 @@
 #include <ratbox_lib.h>
 #include "getaddrinfo.h"
 
-/*  $Id$ */
+/*   */
 
 static const char in_addrany[]	= { 0, 0, 0, 0 };
 static const char in_loopback[] = { 127, 0, 0, 1 };

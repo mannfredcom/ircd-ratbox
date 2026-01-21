@@ -1,7 +1,6 @@
 
 /*
  * snprintf.c - just some sprintf append type functions 
- * $Id: snprintf.c 28631 2015-08-21 02:35:07Z androsyn $
  */
 #include <libratbox_config.h>
 #include <ratbox_lib.h>
