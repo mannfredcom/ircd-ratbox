@@ -198,7 +198,7 @@ const char *
 rb_lib_version(void)
 {
 	static char version_info[512];
-	char ssl_info[512];
+	char ssl_info[400];
 	rb_get_ssl_info(ssl_info, sizeof(ssl_info));
 	snprintf(version_info, sizeof(version_info), "libratbox version: %s - %s", libratbox_serno,
 		 ssl_info);

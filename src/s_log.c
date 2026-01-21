@@ -173,7 +173,7 @@ ilog(ilogfile dest, const char *format, ...)
 {
 	FILE *logfile = *log_table[dest].logfile;
 	char buf[IRCD_BUFSIZE];
-	char buf2[IRCD_BUFSIZE];
+	char buf2[IRCD_BUFSIZE*2];
 	va_list args;
 
 	va_start(args, format);
