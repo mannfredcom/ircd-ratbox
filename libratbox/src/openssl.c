@@ -263,16 +263,6 @@ rb_ssl_accept_setup(rb_fde_t *F, rb_fde_t *new_F, struct sockaddr *st, rb_sockle
 		return;
 
 	new_F->type |= RB_FD_SSL;
-	new_F->ssl = SSL_new(new_F->sctx->ssl_ctx);
-
-	if(new_F->ssl == NULL)
-	{
-		new_F->sslerr.ssl_errno = get_last_err();
-		rb_lib_log("rb_ssl_accept_setup: SSL_new() fails: %s", ERR_error_string(new_F->sslerr.ssl_errno, NULL));
-		new_F->accept->callback(new_F, RB_ERROR_SSL, NULL, 0, new_F->accept->data);
-		return;
-	}
-	
 	new_F->accept = rb_malloc(sizeof(struct acceptdata));
 
 	new_F->accept->callback = F->accept->callback;
@@ -280,6 +270,18 @@ rb_ssl_accept_setup(rb_fde_t *F, rb_fde_t *new_F, struct sockaddr *st, rb_sockle
 	rb_settimeout(new_F, 10, rb_ssl_timeout, NULL);
 	memcpy(&new_F->accept->S, st, addrlen);
 	new_F->accept->addrlen = addrlen;
+
+	new_F->ssl = SSL_new(new_F->sctx->ssl_ctx);
+
+	if(new_F->ssl == NULL)
+	{
+		new_F->sslerr.ssl_errno = get_last_err();
+		rb_lib_log("rb_ssl_accept_setup: SSL_new() fails: %s", ERR_error_string(new_F->sslerr.ssl_errno, NULL));
+		new_F->accept->callback(new_F, RB_ERROR_SSL, NULL, 0, new_F->accept->data);
+		rb_free(new_F->accept);
+		new_F->accept = NULL;
+		return;
+	}
 
 	SSL_set_fd((SSL *) new_F->ssl, rb_get_fd(new_F));
 	rb_setup_ssl_cb(new_F);
