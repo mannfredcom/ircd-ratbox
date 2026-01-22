@@ -203,11 +203,11 @@ rb_ssl_accept_setup(rb_fde_t *F, rb_fde_t *new_F, struct sockaddr *st, rb_sockle
 	gnutls_credentials_set(SSL_P(new_F), GNUTLS_CRD_CERTIFICATE, new_F->sctx->x509);
 	gnutls_dh_set_prime_bits(SSL_P(new_F), 1024);
 	gnutls_transport_set_ptr(SSL_P(new_F), (gnutls_transport_ptr_t) (long int)rb_get_fd(new_F));
-	if(do_ssl_handshake(F, rb_ssl_tryaccept, NULL))
+	if(do_ssl_handshake(new_F, rb_ssl_tryaccept, NULL))
 	{
-		struct acceptdata *ad = F->accept;
-		F->accept = NULL;
-		ad->callback(F, RB_OK, (struct sockaddr *)&ad->S, ad->addrlen, ad->data);
+		struct acceptdata *ad = new_F->accept;
+		new_F->accept = NULL;
+		ad->callback(new_F, RB_OK, (struct sockaddr *)&ad->S, ad->addrlen, ad->data);
 		rb_free(ad);
 	}
 }
