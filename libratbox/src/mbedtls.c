@@ -245,12 +245,12 @@ rb_ssl_accept_setup(rb_fde_t *F, rb_fde_t *new_F, struct sockaddr *st, rb_sockle
 	new_F->accept->addrlen = addrlen;
 
 	rb_ssl_setup_srv_context(new_F);
-	if(do_ssl_handshake(F, rb_ssl_tryaccept, NULL))
+	if(do_ssl_handshake(new_F, rb_ssl_tryaccept, NULL))
 	{
-		struct acceptdata *ad = F->accept;
-		F->accept = NULL;
+		struct acceptdata *ad = new_F->accept;
+		new_F->accept = NULL;
 
-		ad->callback(F, RB_OK, (struct sockaddr *)&ad->S, ad->addrlen, ad->data);
+		ad->callback(new_F, RB_OK, (struct sockaddr *)&ad->S, ad->addrlen, ad->data);
 		rb_free(ad);
 	}
 }
