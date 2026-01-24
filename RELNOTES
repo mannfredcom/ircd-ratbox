@@ -9,6 +9,11 @@ If you are upgrading from 2.1, you must read doc/whats-new-2.2.txt
 If you are upgrading from 2.0, you must also read doc/whats-new-2.1.txt
 If you are upgrading from 1.x, you must also read doc/whats-new-2.0.txt
 
+-- ircd-ratbox-3.0.12
+- Minor D-line bugfixes (3.1 backport)
+- Minor linebuf bugfixes (3.1 backport)
+- Compilation support for latest OpenSSL versions (3.1 backport)
+
 -- ircd-ratbox-3.0.11
 - Use TLS_client_method for client context
 - Increase SSL handshake flood limit

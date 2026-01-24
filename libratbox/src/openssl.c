@@ -187,6 +187,9 @@ rb_ssl_accept_common(rb_fde_t *new_F)
 void
 rb_ssl_start_accepted(rb_fde_t *new_F, ACCB * cb, void *data, int timeout)
 {
+	if(ssl_server_ctx == NULL)
+		return;
+
 	new_F->type |= RB_FD_SSL;
 	new_F->ssl = SSL_new(ssl_server_ctx);
 	new_F->accept = rb_malloc(sizeof(struct acceptdata));
@@ -207,6 +210,9 @@ rb_ssl_start_accepted(rb_fde_t *new_F, ACCB * cb, void *data, int timeout)
 void
 rb_ssl_accept_setup(rb_fde_t *F, rb_fde_t *new_F, struct sockaddr *st, int addrlen)
 {
+	if(ssl_server_ctx == NULL)
+		return;
+	
 	new_F->type |= RB_FD_SSL;
 	new_F->ssl = SSL_new(ssl_server_ctx);
 	new_F->accept = rb_malloc(sizeof(struct acceptdata));
@@ -286,20 +292,21 @@ rb_init_ssl(void)
 {
 	int ret = 1;
 	char libratbox_data[] = "libratbox data";
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	SSL_load_error_strings();
 	SSL_library_init();
-	libratbox_index = SSL_get_ex_new_index(0, libratbox_data, NULL, NULL, NULL);
-	ssl_server_ctx = SSL_CTX_new(SSLv23_server_method());
-	if(ssl_server_ctx == NULL)
-	{
-		rb_lib_log("rb_init_openssl: Unable to initialize OpenSSL server context: %s",
-			   ERR_error_string(ERR_get_error(), NULL));
-		ret = 0;
-	}
-	/* Disable SSLv2, make the client use our settings */
-	SSL_CTX_set_options(ssl_server_ctx, SSL_OP_NO_SSLv2 | SSL_OP_CIPHER_SERVER_PREFERENCE);
+#else
+	OPENSSL_init_ssl(0, NULL);
+#endif
 
+	libratbox_index = SSL_get_ex_new_index(0, libratbox_data, NULL, NULL, NULL);
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	ssl_client_ctx = SSL_CTX_new(SSLv23_server_method());
+#else
 	ssl_client_ctx = SSL_CTX_new(TLS_client_method());
+#endif
 
 	if(ssl_client_ctx == NULL)
 	{
@@ -315,12 +322,18 @@ int
 rb_setup_ssl_server(const char *cert, const char *keyfile, const char *dhfile)
 {
         const char *libratbox_data = "libratbox tls session";
-	const char *ciphers = "kEECDH+HIGH:kEDH+HIGH:HIGH:!RC4:!aNULL";
-	const char *named_curve = "prime256v1";
+	const char *ciphers = "ECDHE+AESGCM:ECDHE+CHACHA20:ECDHE+AES:"
+			      "DHE+AESGCM:DHE+AES:"
+                              "!aNULL:!eNULL:!MD5:!RC4:!3DES:!DES:!EXP:!EXPORT:!PSK:!SRP";
 	unsigned long err;
 	long tls_opts;
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	ssl_server_ctx = SSL_CTX_new(SSLv23_server_method());
+#else
+	ssl_server_ctx = SSL_CTX_new(TLS_server_method());
+#endif
+
 	if(ssl_server_ctx == NULL)
 	{
 		rb_lib_log("rb_init_openssl: Unable to initialize OpenSSL server context: %s",
@@ -330,6 +343,10 @@ rb_setup_ssl_server(const char *cert, const char *keyfile, const char *dhfile)
 	tls_opts = SSL_CTX_get_options(ssl_server_ctx);
 	/* Disable SSLv2, make the client use our settings */
 	tls_opts |= SSL_OP_NO_SSLv2 | SSL_OP_NO_COMPRESSION | SSL_OP_CIPHER_SERVER_PREFERENCE | SSL_OP_NO_SSLv3;
+
+#ifdef SSL_OP_NO_RENEGOTIATION
+	tls_opts |= SSL_OP_NO_RENEGOTIATION;
+#endif
 
 #ifdef SSL_OP_NO_TICKET
 	tls_opts |= SSL_OP_NO_TICKET;
@@ -369,6 +386,7 @@ rb_setup_ssl_server(const char *cert, const char *keyfile, const char *dhfile)
 			   ERR_error_string(err, NULL));
 		goto cleanup;
 	}
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 	if(dhfile != NULL && *dhfile != '\0')
 	{
 		/* DH parameters aren't necessary, but they are nice..if they didn't pass one..that is their problem */
@@ -402,36 +420,10 @@ rb_setup_ssl_server(const char *cert, const char *keyfile, const char *dhfile)
 			goto cleanup;	  
 		}
 	}
+#else
+	SSL_CTX_set_dh_auto(ssl_server_ctx, 1);
+#endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x0090800fL
-#ifndef OPENSSL_NO_ECDH
-	if(named_curve != NULL)
-	{
-		int nid;
-		EC_KEY *ecdh;
-		
-		nid = OBJ_sn2nid(named_curve);
-		if(nid == 0)
-		{
-			err = ERR_get_error();
-			rb_lib_log("rb_setup_ssl_server: Unknown curve named [%s]: %s", named_curve, ERR_error_string(err, NULL));
-		} else {
-			ecdh = EC_KEY_new_by_curve_name(nid);
-			if(ecdh == NULL)
-			{
-				err = ERR_get_error();
-				rb_lib_log("rb_setup_ssl_server: Curve creation failed for [%s]: %s", named_curve, ERR_error_string(err, NULL));
-			} else {
-				tls_opts = SSL_CTX_get_options(ssl_server_ctx);
-				tls_opts |= SSL_OP_SINGLE_ECDH_USE;
-				SSL_CTX_set_options(ssl_server_ctx, tls_opts);
-				SSL_CTX_set_tmp_ecdh(ssl_server_ctx, ecdh);
-				EC_KEY_free(ecdh);
-			}
-		}
-	}
-#endif
-#endif
 	SSL_CTX_set_session_id_context(ssl_server_ctx, (const unsigned char *)libratbox_data, strlen(libratbox_data));
 	return 1;
 
@@ -641,11 +633,16 @@ rb_get_random(void *buf, size_t length)
 int
 rb_get_pseudo_random(void *buf, size_t length)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	int ret;
 	ret = RAND_pseudo_bytes(buf, length);
 	if(ret < 0)
 		return 0;
 	return 1;
+#else
+	return rb_get_random(buf, length);
+#endif
+
 }
 
 const char *
@@ -660,11 +657,19 @@ rb_supports_ssl(void)
 	return 1;
 }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+# define rb_ssl_version_num() (long)SSLeay()
+# define rb_ssl_version_str() SSLeay_version(SSLEAY_VERSION)
+#else
+# define rb_ssl_version_num() (long)OpenSSL_version_num()
+# define rb_ssl_version_str() OpenSSL_version(OPENSSL_VERSION)
+#endif
+
 void
 rb_get_ssl_info(char *buf, size_t len)
 {
 	rb_snprintf(buf, len, "Using SSL: %s compiled: 0x%lx, library 0x%lx", 
-		    SSLeay_version(SSLEAY_VERSION), OPENSSL_VERSION_NUMBER, SSLeay());
+		    rb_ssl_version_str(), (long)OPENSSL_VERSION_NUMBER, rb_ssl_version_num());
 }
 
 
