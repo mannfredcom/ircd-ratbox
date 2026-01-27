@@ -908,7 +908,6 @@ zlib_process(mod_ctl_t * ctl, mod_ctl_buf_t * ctlb)
 }
 #endif
 
-
 static char *advance_zstring(uint8_t **p)
 {
 	rb_zstring_t *zs;
@@ -917,6 +916,12 @@ static char *advance_zstring(uint8_t **p)
 	
 	zs = rb_zstring_alloc();
 	l = rb_zstring_deserialize(zs, *p); 
+
+	if(l == -1)
+	{
+		rb_zstring_free(zs);
+		return NULL;
+	}
 
 	*p += l;
 	if(rb_zstring_len(zs) == 0)
