@@ -162,12 +162,8 @@ get_vm_top(void)
 	 * offset from 0 (NULL), so the result of sbrk is cast to a size_t and 
 	 * returned. We really shouldn't be using it here but...
 	 */
-#ifndef _WIN32
 	void *vptr = sbrk(0);
-	return (unsigned long)vptr;
-#else
-	return 0;
-#endif
+	return (uintptr_t)vptr;
 }
 
 /*
@@ -232,7 +228,6 @@ init_sys(void)
 static int
 make_daemon(void)
 {
-#ifndef _WIN32
 	int pid, fd;
 
 	if((pid = fork()) < 0)
@@ -254,7 +249,6 @@ make_daemon(void)
 	dup2(fd, 1);
 	dup2(fd, 2);
 	close(fd);
-#endif
 	return 0;
 }
 
@@ -489,13 +483,12 @@ ratbox_main(int argc, char *argv[])
 	char emptyname[] = "";
 	int r;
 	/* Check to see if the user is running us as root, which is a nono */
-#ifndef _WIN32
 	if(geteuid() == 0)
 	{
 		fprintf(stderr, "Don't run ircd as root!!!\n");
 		exit(EXIT_FAILURE);
 	}
-#endif
+
 	initialVMTop = get_vm_top();
 
 	init_sys();
@@ -604,7 +597,7 @@ ratbox_main(int argc, char *argv[])
 
 
 
-#if defined(__CYGWIN__) || defined(_WIN32) || defined(RATBOX_PROFILE)
+#if defined(__CYGWIN__) || defined(RATBOX_PROFILE)
 	server_state_foreground = 1;
 #endif
 
@@ -757,19 +750,15 @@ server_reboot(void)
 	 * bah, for now, the program ain't coming back to here, so forcibly
 	 * close everything the "wrong" way for now, and just LEAVE...
 	 */
-#ifndef _WIN32
 	int i;
 	for(i = 0; i < maxconnections; ++i)
 		close(i);
-#endif
 
 	unlink(pidFileName);
-#ifndef _WIN32
 	int fd = open("/dev/null", O_RDWR);
 	dup2(fd, 0);
 	dup2(fd, 1);
 	dup2(fd, 2);
-#endif
 
 	execv(SPATH, (void *)myargv);
 

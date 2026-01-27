@@ -174,7 +174,6 @@ rb_get_sockerr(rb_fde_t *F)
 	if(!(F->type & RB_FD_SOCKET))
 		return errno;
 
-	rb_get_errno();
 	errtmp = errno;
 
 #ifdef SO_ERROR
@@ -343,7 +342,6 @@ rb_accept_tryaccept(rb_fde_t *F, void *data)
 	while(1)
 	{
 		new_fd = accept(F->fd, (struct sockaddr *)&st, &addrlen);
-		rb_get_errno();
 		if(new_fd < 0)
 		{
 			rb_setselect(F, RB_SELECT_ACCEPT, rb_accept_tryaccept, NULL);
@@ -365,7 +363,6 @@ rb_accept_tryaccept(rb_fde_t *F, void *data)
 
 		if(rb_unlikely(!rb_set_nb(new_F)))
 		{
-			rb_get_errno();
 			rb_lib_log("rb_accept: Couldn't set FD %d non blocking!", new_F->fd);
 			rb_close(new_F);
 		}
@@ -524,7 +521,6 @@ rb_connect_tryconnect(rb_fde_t *F, void *notused)
 		 * which is a good thing.
 		 *   -- adrian
 		 */
-		rb_get_errno();
 		if(errno == EISCONN)
 			rb_connect_callback(F, RB_OK);
 		else if(rb_ignore_errno(errno))
@@ -957,7 +953,6 @@ rb_get_fde(int fd)
 ssize_t
 rb_read(rb_fde_t *F, void *buf, size_t count)
 {
-	ssize_t ret;
 	if(F == NULL)
 		return 0;
 
@@ -972,12 +967,7 @@ rb_read(rb_fde_t *F, void *buf, size_t count)
 #endif
 	if(F->type & RB_FD_SOCKET)
 	{
-		ret = recv(F->fd, buf, count, 0);
-		if(ret < 0)
-		{
-			rb_get_errno();
-		}
-		return ret;
+		return recv(F->fd, buf, count, 0);
 	}
 
 
@@ -989,7 +979,6 @@ rb_read(rb_fde_t *F, void *buf, size_t count)
 ssize_t
 rb_write(rb_fde_t *F, const void *buf, size_t count)
 {
-	ssize_t ret;
 	if(F == NULL)
 		return 0;
 
@@ -1001,12 +990,7 @@ rb_write(rb_fde_t *F, const void *buf, size_t count)
 #endif
 	if(F->type & RB_FD_SOCKET)
 	{
-		ret = send(F->fd, buf, count, MSG_NOSIGNAL);
-		if(ret < 0)
-		{
-			rb_get_errno();
-		}
-		return ret;
+		return send(F->fd, buf, count, MSG_NOSIGNAL);
 	}
 
 	return write(F->fd, buf, count);
@@ -1581,11 +1565,8 @@ rb_inet_socketpair_udp(rb_fde_t **newF1, rb_fde_t **newF2)
 	return 0;
 
       abort_failed:
-	rb_get_errno();
 	errno = ECONNABORTED;
       failed:
-	if(errno != ECONNABORTED)
-		rb_get_errno();
 	int o_errno = errno;
 	if(F[0] != NULL)
 		rb_close(F[0]);
@@ -1815,24 +1796,6 @@ try_poll(void)
 }
 
 static int
-try_win32(void)
-{
-	if(!rb_init_netio_win32())
-	{
-		setselect_handler = rb_setselect_win32;
-		select_handler = rb_select_win32;
-		setup_fd_handler = rb_setup_fd_win32;
-		io_sched_event = NULL;
-		io_unsched_event = NULL;
-		io_init_event = NULL;
-		io_supports_event = rb_unsupported_event;
-		rb_strlcpy(iotype, "win32", sizeof(iotype));
-		return 0;
-	}
-	return -1;
-}
-
-static int
 try_select(void)
 {
 	if(!rb_init_netio_select())
@@ -1930,12 +1893,6 @@ rb_init_netio(void)
 			if(!try_select())
 				return;
 		}
-		if(!strcmp("win32", ioenv))
-		{
-			if(!try_win32())
-				return;
-		}
-
 	}
 #if 0
 	if(!try_libevent())
@@ -1950,8 +1907,6 @@ rb_init_netio(void)
 	if(!try_devpoll())
 		return;
 	if(!try_poll())
-		return;
-	if(!try_win32())
 		return;
 	if(!try_select())
 		return;

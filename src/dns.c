@@ -193,19 +193,15 @@ static int
 start_resolver(void)
 {
 	char fullpath[PATH_MAX + 1];
-#ifdef _WIN32
-	const char *suffix = ".exe";
-#else
-	const char *suffix = "";
-#endif
+
 	if(resolver_path == NULL)
 	{
-		snprintf(fullpath, sizeof(fullpath), "%s/resolver%s", LIBEXEC_DIR, suffix);
+		snprintf(fullpath, sizeof(fullpath), "%s/resolver", LIBEXEC_DIR);
 
 		if(access(fullpath, X_OK) == -1)
 		{
-			snprintf(fullpath, sizeof(fullpath), "%s/libexec/ircd-ratbox/resolver%s",
-				 ConfigFileEntry.dpath, suffix);
+			snprintf(fullpath, sizeof(fullpath), "%s/libexec/ircd-ratbox/resolver",
+				 ConfigFileEntry.dpath);
 			if(access(fullpath, X_OK) == -1)
 			{
 				ilog(L_MAIN,

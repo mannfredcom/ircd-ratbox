@@ -179,15 +179,11 @@ ilog(ilogfile dest, const char *format, ...)
 	va_end(args);
 
 	snprintf(buf2, sizeof(buf2), "%s %s\n", smalldate(rb_current_time()), buf);
-#ifndef _WIN32
 	if(logfile == NULL || server_state_foreground)
 	{
-#endif
 		fputs(buf2, stderr);
 		fflush(stderr);
-#ifndef _WIN32
 	}
-#endif
 
 	if(logfile == NULL)
 		return;

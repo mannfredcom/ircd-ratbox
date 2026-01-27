@@ -27,7 +27,6 @@
 #include "dns.h"
 #include "s_auth.h"
 
-#ifndef _WIN32
 /*
  * dummy_handler - don't know if this is really needed but if alarm is still
  * being used we probably will
@@ -222,19 +221,3 @@ setup_reboot_signals(void)
 
 
 }
-
-
-
-#else
-void
-setup_signals()
-{
-/* this is a stub for mingw32 */
-}
-
-void
-setup_reboot_signals()
-{
-/* this is a stub for mingw32 */
-}
-#endif

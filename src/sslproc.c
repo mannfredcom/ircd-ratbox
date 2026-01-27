@@ -209,11 +209,6 @@ start_ssldaemon(int count, const char *ssl_ca_cert, const char *ssl_cert, const 
 {
 	rb_fde_t *F1, *F2;
 	rb_fde_t *P1, *P2;
-#ifdef _WIN32
-	const char *suffix = ".exe";
-#else
-	const char *suffix = "";
-#endif
 	char fullpath[PATH_MAX + 1];
 	char fdarg[6];
 	const char *parv[2];
@@ -238,17 +233,17 @@ start_ssldaemon(int count, const char *ssl_ca_cert, const char *ssl_cert, const 
 	last_spin = rb_current_time();
 	if(ssld_path == NULL)
 	{
-		snprintf(fullpath, sizeof(fullpath), "%s/ssld%s", LIBEXEC_DIR, suffix);
+		snprintf(fullpath, sizeof(fullpath), "%s/ssld", LIBEXEC_DIR);
 
 		if(access(fullpath, X_OK) == -1)
 		{
-			snprintf(fullpath, sizeof(fullpath), "%s/libexec/ircd-ratbox/ssld%s",
-				 ConfigFileEntry.dpath, suffix);
+			snprintf(fullpath, sizeof(fullpath), "%s/libexec/ircd-ratbox/ssld",
+				 ConfigFileEntry.dpath);
 			if(access(fullpath, X_OK) == -1)
 			{
 				ilog(L_MAIN,
 				     "Unable to execute ssld%s in %s/libexec/ircd-ratbox or %s",
-				     ConfigFileEntry.dpath, suffix, LIBEXEC_DIR);
+				     ConfigFileEntry.dpath, LIBEXEC_DIR);
 				return 0;
 			}
 		}
@@ -279,10 +274,7 @@ start_ssldaemon(int count, const char *ssl_ca_cert, const char *ssl_cert, const 
 		rb_setenv("CTL_PIPE", fdarg, 1);
 		snprintf(s_pid, sizeof(s_pid), "%d", (int)getpid());
 		rb_setenv("CTL_PPID", s_pid, 1);
-#ifdef _WIN32
-		SetHandleInformation((HANDLE) rb_get_fd(F2), HANDLE_FLAG_INHERIT, 1);
-		SetHandleInformation((HANDLE) rb_get_fd(P1), HANDLE_FLAG_INHERIT, 1);
-#endif
+
 		pid = rb_spawn_process(ssld_path, (const char **)parv);
 		if(pid == -1)
 		{

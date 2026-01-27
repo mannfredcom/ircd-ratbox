@@ -87,22 +87,16 @@ static int
 bandb_start(void)
 {
 	char fullpath[PATH_MAX + 1];
-#ifdef _WIN32
-	const char *suffix = ".exe";
-#else
-	const char *suffix = "";
-#endif
-
 
 	rb_setenv("BANDB_DPATH", ServerInfo.bandb_path, 1);
 	if(bandb_path == NULL)
 	{
-		snprintf(fullpath, sizeof(fullpath), "%s/bandb%s", LIBEXEC_DIR, suffix);
+		snprintf(fullpath, sizeof(fullpath), "%s/bandb", LIBEXEC_DIR);
 
 		if(access(fullpath, X_OK) == -1)
 		{
-			snprintf(fullpath, sizeof(fullpath), "%s/libexec/ircd-ratbox/bandb%s",
-				 ConfigFileEntry.dpath, suffix);
+			snprintf(fullpath, sizeof(fullpath), "%s/libexec/ircd-ratbox/bandb",
+				 ConfigFileEntry.dpath);
 
 			if(access(fullpath, X_OK) == -1)
 			{

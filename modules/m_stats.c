@@ -829,7 +829,6 @@ stats_resv(struct Client *source_p)
 static void
 stats_usage(struct Client *source_p)
 {
-#ifndef _WIN32
 	struct rusage rus;
 	time_t secs;
 	time_t rup;
@@ -840,7 +839,6 @@ stats_usage(struct Client *source_p)
 #define hzz HZ
 #else
 	int hzz = 1;
-#endif
 #endif
 
 	if(getrusage(RUSAGE_SELF, &rus) == -1)
