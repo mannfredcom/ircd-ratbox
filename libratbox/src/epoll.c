@@ -263,7 +263,6 @@ rb_epoll_supports_event(void)
 	struct sigevent ev;
 	struct stat st;
 	int fd;
-	int flags = 0;
 	sigset_t set;
 
 	if(can_do_event == 1)
