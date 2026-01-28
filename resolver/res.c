@@ -35,7 +35,7 @@
  * 2006 --jilles and nenolod
  *
  */
-#include <ratbox_lib.h>
+#include "ratbox_lib.h"
 #include "setup.h"
 #include "res.h"
 #include "reslib.h"
