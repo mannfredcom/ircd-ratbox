@@ -164,7 +164,7 @@ ssize_t rb_zstring_deserialize(rb_zstring_t *zs, void *buf)
 	if(zs->len == 0)
 	{
 		zs->data = NULL;
-		return -1;
+		return sizeof(uint16_t); // we return the amount we consumed 
 	}
 	zs->data = rb_malloc(zs->len);
 	memcpy(zs->data, p, zs->len);
