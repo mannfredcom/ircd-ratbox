@@ -114,7 +114,7 @@ cache_file(const char *filename, const char *shortname, int flags)
 	if(filename == NULL || shortname == NULL)
 		return NULL;
 
-	if((in = fopen(filename, "r")) == NULL)
+	if((in = fopen(filename, "re")) == NULL)
 		return NULL;
 
 	/* check and make sure we have something that is a file... */

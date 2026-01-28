@@ -119,6 +119,7 @@ rb_setselect
 rb_set_time
 rb_settimeout
 rb_set_type
+rb_set_cloexec
 rb_setup_fd
 rb_setup_ssl_server
 rb_sleep

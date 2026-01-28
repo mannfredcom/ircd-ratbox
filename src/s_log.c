@@ -122,7 +122,7 @@ init_main_logfile(const char *filename)
 	verify_logfile_access(filename);
 	if(log_main == NULL)
 	{
-		log_main = fopen(filename, "a");
+		log_main = fopen(filename, "ae");
 	}
 }
 
@@ -133,7 +133,7 @@ open_logfiles(const char *filename)
 
 	close_logfiles();
 
-	log_main = fopen(filename, "a");
+	log_main = fopen(filename, "ae");
 
 	/* log_main is handled above, so just do the rest */
 	for(i = 1; i < LAST_LOGFILE; i++)
@@ -142,7 +142,7 @@ open_logfiles(const char *filename)
 		if(!EmptyString(*log_table[i].name))
 		{
 			verify_logfile_access(*log_table[i].name);
-			*log_table[i].logfile = fopen(*log_table[i].name, "a");
+			*log_table[i].logfile = fopen(*log_table[i].name, "ae");
 		}
 	}
 }

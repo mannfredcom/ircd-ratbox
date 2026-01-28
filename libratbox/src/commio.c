@@ -223,6 +223,46 @@ rb_set_nb(rb_fde_t *F)
 	return 1;
 }
 
+static int rb_fd_set_cloexec(int fd, bool doclose)
+{
+#if defined(FD_CLOEXEC) && defined(F_GETFD) && defined(F_SETFD)
+	int res;
+	res = fcntl(fd, F_GETFD, 0);
+	if(res == -1)
+		return 0;
+
+	if(doclose == true)	
+		res |= FD_CLOEXEC;
+	else
+		res &= ~FD_CLOEXEC;
+	
+	if(fcntl(fd, F_SETFD, res) == -1)
+		return 0;
+
+	return 1;
+#endif
+	return 1;
+}
+
+
+/*
+ *
+ * rb_set_cloexec - Set / Clear close-on-exec 
+ */
+int 
+rb_set_cloexec(rb_fde_t *F, bool doclose)
+{
+	int res;
+	int fd;
+	if(F == NULL)
+		return 0;
+
+	fd = F->fd;
+		
+	return rb_fd_set_cloexec(fd, doclose);
+}
+
+
 /*
  * rb_settimeout() - set the socket timeout
  *
@@ -312,13 +352,20 @@ rb_accept_tryaccept(rb_fde_t *F, void *data)
 
 	while(1)
 	{
+#ifdef HAVE_ACCEPT4
+		new_fd = accept4(F->fd, (struct sockaddr *)&st, &addrlen, SOCK_NONBLOCK | SOCK_CLOEXEC);
+#else
 		new_fd = accept(F->fd, (struct sockaddr *)&st, &addrlen);
+#endif
+
 		if(new_fd < 0)
 		{
 			rb_setselect(F, RB_SELECT_ACCEPT, rb_accept_tryaccept, NULL);
 			return;
 		}
-
+#ifndef HAVE_ACCEPT4
+		rb_fd_set_cloexec(new_fd);
+#endif
 		new_F = rb_open(new_fd, RB_FD_SOCKET, "Incoming Connection");
 
 		if(new_F == NULL)
@@ -537,9 +584,20 @@ rb_socketpair(int family, int sock_type, int proto, rb_fde_t **F1, rb_fde_t **F2
 		return -1;
 	}
 
+#if defined(SOCK_CLOEXEC)
+	/* this of course means the caller when passing the second FD to something
+	 * must change this back to allowing passing on exec
+	 */
+	sock_type |= SOCK_CLOEXEC;
+#endif
 	if(socketpair(family, sock_type, proto, nfd))
 		return -1;
 
+#if !defined(SOCK_CLOEXEC)
+	rb_fd_set_cloexec(nfd[0], true);
+	rb_fd_set_cloexec(nfd[1], true);
+#endif
+	
 	*F1 = rb_open(nfd[0], RB_FD_SOCKET, note);
 	*F2 = rb_open(nfd[1], RB_FD_SOCKET, note);
 
@@ -590,9 +648,17 @@ rb_pipe(rb_fde_t **F1, rb_fde_t **F2, const char *desc)
 		errno = ENFILE;
 		return -1;
 	}
+#if defined(HAVE_PIPE2) && defined(O_CLOEXEC)
+	if(pipe2(fd, O_NONBLOCK | O_CLOEXEC) == -1)
+#else
 	if(pipe(fd) == -1)
+#endif
 		return -1;
 
+#if !defined(HAVE_PIPE2)
+	rb_fd_set_cloexec(fd[0], true);
+	rb_fd_set_cloexec(fd[1], true);
+#endif
 	*F1 = rb_open(fd[0], RB_FD_PIPE, desc);
 	*F2 = rb_open(fd[1], RB_FD_PIPE, desc);
 
@@ -635,6 +701,10 @@ rb_socket(int family, int sock_type, int proto, const char *note)
 		return NULL;
 	}
 
+#if defined(SOCK_CLOEXEC)
+	sock_type |= SOCK_CLOEXEC;
+#endif
+
 	/*
 	 * Next, we try to open the socket. We *should* drop the reserved FD
 	 * limit if/when we get an error, but we can deal with that later.
@@ -644,6 +714,10 @@ rb_socket(int family, int sock_type, int proto, const char *note)
 
 	if(rb_unlikely(fd < 0))
 		return NULL;	/* errno will be passed through, yay.. */
+
+#if !defined(SOCK_CLOEXEC)
+	rb_fd_set_cloexec(fd, true);
+#endif
 
 #if defined(RB_IPV6) && defined(IPV6_V6ONLY)
 	/* 

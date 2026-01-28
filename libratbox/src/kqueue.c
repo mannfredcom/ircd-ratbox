@@ -147,7 +147,12 @@ kq_update_events(rb_fde_t *F, short filter, PF * handler)
 int
 rb_init_netio_kqueue(void)
 {
+#ifdef HAVE_KQUEUE1
+	kq = kqueue1(O_CLOEXEC);
+#else
 	kq = kqueue();
+#endif
+
 	if(kq < 0)
 	{
 		return errno;

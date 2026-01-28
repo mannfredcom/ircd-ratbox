@@ -677,7 +677,7 @@ read_config_file(const char *filename)
 	conf_parse_failure = false;
 	delete_all_conf();
 	rb_strlcpy(conffilebuf, filename, sizeof(conffilebuf));
-	if((conf_fbfile_in = fopen(filename, "r")) == NULL)
+	if((conf_fbfile_in = fopen(filename, "re")) == NULL)
 	{
 		conf_report_error_nl("Unable to open file %s %s", filename, strerror(errno));
 		return 1;

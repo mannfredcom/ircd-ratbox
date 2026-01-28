@@ -263,6 +263,7 @@ start_ssldaemon(int count, const char *ssl_ca_cert, const char *ssl_cert, const 
 		}
 		rb_set_buffers(F1, READBUF_SIZE*32);
 		rb_set_buffers(F2, READBUF_SIZE*32);
+		rb_set_cloexec(F2, false);
 		snprintf(fdarg, sizeof(fdarg), "%d", rb_get_fd(F2));
 		rb_setenv("CTL_FD", fdarg, 1);
 		if(rb_pipe(&P1, &P2, "SSL/TLS pipe") == -1)
@@ -270,6 +271,7 @@ start_ssldaemon(int count, const char *ssl_ca_cert, const char *ssl_cert, const 
 			ilog(L_MAIN, "Unable to create ssld - rb_pipe failed: %s", strerror(errno));
 			return started;
 		}
+		rb_set_cloexec(P1, false);
 		snprintf(fdarg, sizeof(fdarg), "%d", rb_get_fd(P1));
 		rb_setenv("CTL_PIPE", fdarg, 1);
 		snprintf(s_pid, sizeof(s_pid), "%d", (int)getpid());

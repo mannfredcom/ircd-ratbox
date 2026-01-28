@@ -197,7 +197,7 @@ void cinclude(void)
 	{
 		FILE *tmp_fbfile_in;
     
-		tmp_fbfile_in = fopen(c, "r");
+		tmp_fbfile_in = fopen(c, "re");
     
 		if (tmp_fbfile_in == NULL)
 		{
@@ -205,7 +205,7 @@ void cinclude(void)
 			char fnamebuf[IRCD_BUFSIZE];
 
 			snprintf(fnamebuf, sizeof(fnamebuf), "%s/%s", ETCPATH, c);
-			tmp_fbfile_in = fopen(fnamebuf, "r");
+			tmp_fbfile_in = fopen(fnamebuf, "re");
 
 			/* wasnt found there either.. error. */
 			if(tmp_fbfile_in == NULL)

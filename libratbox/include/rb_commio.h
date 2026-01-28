@@ -111,6 +111,7 @@ void rb_note(rb_fde_t *, const char *);
 #define RB_SSL_CERTFP_LEN 32
 
 int rb_set_nb(rb_fde_t *);
+int rb_set_cloexec(rb_fde_t *, bool);
 int rb_set_buffers(rb_fde_t *, int);
 
 int rb_get_sockerr(rb_fde_t *);

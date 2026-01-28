@@ -128,6 +128,9 @@ rb_helper_start(const char *name, const char *fullpath, rb_helper_cb * read_cb,
 		return NULL;
 	}
 
+	rb_set_cloexec(in_f[1], false);
+	rb_set_cloexec(out_f[0], false);
+	
 	snprintf(fx, sizeof(fx), "%d", rb_get_fd(in_f[1]));
 	snprintf(fy, sizeof(fy), "%d", rb_get_fd(out_f[0]));
 

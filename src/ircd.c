@@ -376,7 +376,7 @@ write_pidfile(const char *filename)
 {
 	FILE *fb;
 	char buff[32];
-	if((fb = fopen(filename, "w")))
+	if((fb = fopen(filename, "we")))
 	{
 		unsigned int pid = (unsigned int)getpid();
 
@@ -411,7 +411,7 @@ check_pidfile(const char *filename)
 	pid_t pidfromfile;
 
 	/* Don't do logging here, since we don't have log() initialised */
-	if((fb = fopen(filename, "r")))
+	if((fb = fopen(filename, "re")))
 	{
 		if(fgets(buff, sizeof(buff), fb) != NULL)
 		{

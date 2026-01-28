@@ -70,7 +70,11 @@ rb_init_netio_epoll(void)
 	can_do_timerfd = 0;
 	ep_info = rb_malloc(sizeof(struct epoll_info));
 	ep_info->pfd_size = getdtablesize();
+#if defined(HAVE_EPOLL_CREATE1) && defined(EPOLL_CLOEXEC)
+	ep_info->ep = epoll_create1(EPOLL_CLOEXEC);
+#else
 	ep_info->ep = epoll_create(ep_info->pfd_size);
+#endif	
 	if(ep_info->ep < 0)
 	{
 		return -1;
@@ -259,6 +263,7 @@ rb_epoll_supports_event(void)
 	struct sigevent ev;
 	struct stat st;
 	int fd;
+	int flags = 0;
 	sigset_t set;
 
 	if(can_do_event == 1)
@@ -275,7 +280,7 @@ rb_epoll_supports_event(void)
 	}
 
 #ifdef USE_TIMERFD_CREATE
-	if((fd = timerfd_create(CLOCK_REALTIME, 0)) >= 0)
+	if((fd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC)) >= 0)
 	{
 		close(fd);
 		can_do_event = 1;
@@ -293,7 +298,7 @@ rb_epoll_supports_event(void)
 	}
 	timer_delete(timer);
 	sigemptyset(&set);
-	fd = signalfd(-1, &set, 0);
+	fd = signalfd(-1, &set, SFD_CLOEXEC);
 	if(fd < 0)
 	{
 		can_do_event = -1;
@@ -475,7 +480,7 @@ rb_epoll_sched_event_timerfd(rb_ev_entry *event, time_t when)
 	int fd;
 	rb_fde_t *F;
 
-	if((fd = timerfd_create(CLOCK_REALTIME, 0)) < 0)
+	if((fd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC)) < 0)
 	{
 		rb_lib_log("timerfd_create: %s\n", strerror(errno));
 		return 0;
