@@ -242,7 +242,7 @@ start_ssldaemon(int count, const char *ssl_ca_cert, const char *ssl_cert, const 
 			if(access(fullpath, X_OK) == -1)
 			{
 				ilog(L_MAIN,
-				     "Unable to execute ssld%s in %s/libexec/ircd-ratbox or %s",
+				     "Unable to execute ssld%s in %s/libexec/ircd-ratbox",
 				     ConfigFileEntry.dpath, LIBEXEC_DIR);
 				return 0;
 			}
