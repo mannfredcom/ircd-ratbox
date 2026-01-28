@@ -228,7 +228,7 @@ hash_create(const char *name, hash_cmptype cmptype, unsigned int hashbits, unsig
 
 	hfunc->name = rb_strdup(name);
 	hfunc->hashbits = hashbits;
-	hfunc->htable = rb_malloc(sizeof(rb_dlink_list *) * (1 << hashbits));
+	hfunc->htable = rb_malloc(sizeof(rb_dlink_list *) * (1U << hashbits));
 	hfunc->cmptype = cmptype;
 	hfunc->hashlen = maxkeylen; 
 	switch(cmptype)
@@ -513,7 +513,7 @@ hash_del_hnode(hash_f *hf, hash_node * hnode)
 void
 hash_destroyall(hash_f *hf, hash_destroy_cb * destroy_cb)
 {
-	for(int i = 0; i < (1 << hf->hashbits); i++)
+	for(unsigned int i = 0; i < (1U << hf->hashbits); i++)
 	{
 		rb_dlink_list *ltable;
 		rb_dlink_node *ptr, *nptr;
@@ -539,7 +539,7 @@ hash_destroyall(hash_f *hf, hash_destroy_cb * destroy_cb)
 void
 hash_walkall(hash_f *hf, hash_walk_cb * walk_cb, void *walk_data)
 {
-	for(unsigned int i = 0; i < ( 1 << hf->hashbits); i++)
+	for(unsigned int i = 0; i < ( 1U << hf->hashbits); i++)
 	{
 		rb_dlink_list *ltable;
 		rb_dlink_node *ptr, *next_ptr;
@@ -565,7 +565,7 @@ hash_get_tablelist(hash_f *hf)
 
 	alltables = rb_malloc(sizeof(rb_dlink_list));
 
-	for(int i = 0; i < (1 << hf->hashbits); i++)
+	for(unsigned int i = 0; i < (1U << hf->hashbits); i++)
 	{
 		rb_dlink_list *table = hf->htable[i];
 		
@@ -660,7 +660,7 @@ hash_stats(struct Client *source_p)
 	RB_DLINK_FOREACH(ptr, list_of_hashes.head)
 	{
 		hash_f *hf = ptr->data;
-		count_hash(source_p, hf->htable, 1 << hf->hashbits, hf->name);
+		count_hash(source_p, hf->htable, 1U << hf->hashbits, hf->name);
 		sendto_one_numeric(source_p, RPL_STATSDEBUG, "B :--");
 	}
 }
@@ -673,7 +673,7 @@ hash_get_memusage(hash_f *hf, size_t * entries, size_t * memusage)
 	hash_node *hnode;
 	size_t mem = 0, cnt = 0;
 	unsigned int max, i;
-	max = 1 << hf->hashbits;
+	max = 1U << hf->hashbits;
 
 	htable = hf->htable;
 	for(i = 0; i < max; i++)
