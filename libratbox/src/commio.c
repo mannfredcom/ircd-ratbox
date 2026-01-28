@@ -722,7 +722,8 @@ rb_listen(rb_fde_t *F, int backlog, bool defer_accept)
 #ifdef TCP_DEFER_ACCEPT
 	if(defer_accept == true && result == 0)
 	{
-		setsockopt(F->fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &backlog, sizeof(int));		
+		int defer_seconds = 3;
+		setsockopt(F->fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &defer_seconds, sizeof(defer_seconds));
 	}
 #endif
 #ifdef SO_ACCEPTFILTER
