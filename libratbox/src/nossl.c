@@ -20,12 +20,30 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
  *  USA
  */
-
 #include "libratbox_config.h"
 #include "ratbox_lib.h"
 #if !defined(HAVE_OPENSSL) && !defined(HAVE_GNUTLS) && !defined(HAVE_MBEDTLS)
 
-#include "arc4random.h"
+#ifndef HAVE_ARC4RANDOM
+#include "rb_arc4random.h"
+
+extern void rb_arc4random_stir(void);
+extern uint32_t rb_arc4random(void);
+extern void rb_arc4random_addrandom(uint8_t *dat, int datlen);
+
+#define arc4random_stir() rb_arc4random_stir()
+#define arc4random() rb_arc4random()
+#define arc4random_addrandom(x, y) rb_arc4random_addrandom(x, y)
+
+#endif
+
+/* newer *bsd doesn't have arc4random_stir */
+#if defined(HAVE_ARC4RANDOM) && !defined(HAVE_ARC4RANDOM_STIR)
+#define arc4random_stir()
+#define NOARC4STIR 1
+#endif
+
+
 
 #include "commio-int.h"
 #include "commio-ssl.h"
@@ -52,19 +70,22 @@ rb_ssl_listen(rb_fde_t *F, int backlog, bool defer_accept)
 	errno = ENOSYS;
 	return -1;
 }
-
+#ifndef NOARC4STIR
 static void
 rb_stir_arc4random(void *unused)
 {
 	arc4random_stir();
 }
+#endif
 
 int
 rb_init_prng(const char *path, prng_seed_t seed_type)
 {
 	/* xxx this ignores the parameters above */
-	arc4random_stir();
+#ifndef NOARC4STIR
+	rb_arc4random_stir();
 	rb_event_addish("rb_stir_arc4random", rb_stir_arc4random, NULL, 300);
+#endif
 	return 1;
 }
 

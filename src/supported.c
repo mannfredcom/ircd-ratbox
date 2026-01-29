@@ -1,5 +1,5 @@
 /*
- *  charybdis: A slightly useful ircd.
+ *  ircd-ratbox: A slightly useful ircd.
  *  supported.c: isupport (005) numeric
  *
  * Copyright (C) 2006-2008 Jilles Tjoelker

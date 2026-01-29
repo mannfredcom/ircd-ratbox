@@ -247,14 +247,10 @@ static int rb_fd_set_cloexec(int fd, bool doclose)
 int 
 rb_set_cloexec(rb_fde_t *F, bool doclose)
 {
-	int res;
-	int fd;
 	if(F == NULL)
 		return 0;
 
-	fd = F->fd;
-		
-	return rb_fd_set_cloexec(fd, doclose);
+	return rb_fd_set_cloexec(F->fd, doclose);
 }
 
 

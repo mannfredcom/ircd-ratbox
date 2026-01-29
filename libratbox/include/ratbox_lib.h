@@ -6,6 +6,7 @@
 
 #include "librb-config.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <limits.h>
 #include <stdarg.h>
 #include <assert.h>

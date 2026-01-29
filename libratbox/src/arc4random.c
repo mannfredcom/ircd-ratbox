@@ -174,7 +174,7 @@ arc4_getword(struct arc4_stream *as)
 }
 
 void
-arc4random_stir(void)
+rb_arc4random_stir(void)
 {
 	if(!rs_initialized)
 	{
@@ -185,7 +185,7 @@ arc4random_stir(void)
 }
 
 void
-arc4random_addrandom(uint8_t *dat, int datlen)
+rb_arc4random_addrandom(uint8_t *dat, int datlen)
 {
 	if(!rs_initialized)
 		arc4random_stir();
@@ -193,7 +193,7 @@ arc4random_addrandom(uint8_t *dat, int datlen)
 }
 
 uint32_t
-arc4random(void)
+rb_arc4random(void)
 {
 	if(!rs_initialized)
 		arc4random_stir();
