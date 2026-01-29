@@ -32,7 +32,7 @@
 #include "ratbox_lib.h"
 
 #if !defined(HAVE_OPENSSL) && !defined(HAVE_GNUTLS) && !defined(HAVE_MBEDTLS) && !defined(HAVE_ARC4RANDOM)
-#include "rb_arc4random.h"
+#include <arc4random.h>
 #include <errno.h>
 
 #ifdef HAVE_GETRUSAGE
