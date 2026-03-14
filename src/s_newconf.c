@@ -674,22 +674,33 @@ valid_wild_card_simple(const char *data)
 time_t
 valid_temp_time(const char *p)
 {
+	const time_t max_allowed_minutes = (60 * 24 * 7 * 52);
 	time_t result = 0;
+	int clamped = 0;
 
 	while(*p)
 	{
-		if(IsDigit(*p))
-		{
-			result *= 10;
-			result += ((*p) & 0xF);
-			p++;
-		}
-		else
+		if(!IsDigit(*p))
 			return -1;
+
+		if(!clamped)
+		{
+			time_t digit = ((*p) & 0xF);
+
+			if(result > ((max_allowed_minutes - digit) / 10))
+			{
+				result = max_allowed_minutes;
+				clamped = 1;
+			}
+			else
+				result = (result * 10) + digit;
+		}
+
+		p++;
 	}
 
-	if(result > (60 * 24 * 7 * 52))
-		result = (60 * 24 * 7 * 52);
+	if(result > max_allowed_minutes)
+		result = max_allowed_minutes;
 
 	return (result * 60);
 }
@@ -902,5 +913,4 @@ del_channel_hash_resv_hnode(hash_node *hnode)
 	rb_dlinkFindDestroy(aconf, list);
 	hash_del_hnode(HASH_RESV, hnode);
 }
-
 
