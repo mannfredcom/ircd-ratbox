@@ -675,23 +675,18 @@ time_t
 valid_temp_time(const char *p)
 {
 	const time_t max_allowed_minutes = (60 * 24 * 7 * 52);
-	const char *q = p;
 	time_t result = 0;
-
-	while(*q)
-	{
-		if(!IsDigit(*q++))
-			return -1;
-	}
 
 	while(*p)
 	{
-		time_t digit = ((*p++) & 0xF);
-
-		if(result > ((max_allowed_minutes - digit) / 10))
-			return (max_allowed_minutes * 60);
-
-		result = (result * 10) + digit;
+		if(IsDigit(*p))
+		{
+			time_t digit = ((*p) & 0xF);
+			result = (result > ((max_allowed_minutes - digit) / 10)) ? max_allowed_minutes : ((result * 10) + digit);
+			p++;
+		}
+		else
+			return -1;
 	}
 
 	return (result * 60);
