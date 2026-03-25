@@ -902,7 +902,6 @@ rbl_clear_rbllists(void)
         RB_DLINK_FOREACH_SAFE(ptr, next, rbl_lists.head)
         {
         	rbl_t *rbl = ptr->data;
-        	rbl_del_rbl_from_rblists(rbl);
         	rbl_destroy(rbl, true);
         }
 }

@@ -118,7 +118,7 @@ char *substitution_parse(const char *fmt, rb_dlink_list *varlist)
 			*vptr = '\0';
 
 			/* break out ${var} */
-			for (pptr = ptr + 2; *pptr != '\0'; pptr++)
+			for (pptr = ptr + 2; *pptr != '\0' && vptr < varname + sizeof(varname) - 1; pptr++)
 			{
 				if (*pptr != '}')
 					*vptr++ = *pptr;
@@ -128,6 +128,7 @@ char *substitution_parse(const char *fmt, rb_dlink_list *varlist)
 					break;
 				}
 			}
+			*vptr = '\0';
 
 			s_assert(*varname != '\0');
 			s_assert(*pptr != '\0');

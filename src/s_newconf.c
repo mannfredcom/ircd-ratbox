@@ -682,14 +682,13 @@ valid_temp_time(const char *p)
 		{
 			result *= 10;
 			result += ((*p) & 0xF);
+			if(result > (60 * 24 * 7 * 52))
+				result = (60 * 24 * 7 * 52);
 			p++;
 		}
 		else
 			return -1;
 	}
-
-	if(result > (60 * 24 * 7 * 52))
-		result = (60 * 24 * 7 * 52);
 
 	return (result * 60);
 }
