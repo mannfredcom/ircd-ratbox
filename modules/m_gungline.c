@@ -471,6 +471,9 @@ expire_pending_gunglines(void *vptr)
 		   rb_current_time() || vptr == glp_ptr)
 
 		{
+			scache_remove(glp_ptr->oper_server1);
+			if(glp_ptr->oper_server2)
+				scache_remove(glp_ptr->oper_server2);
 			rb_free(glp_ptr->reason1);
 			rb_free(glp_ptr->reason2);
 			rb_free(glp_ptr);
@@ -490,6 +493,9 @@ flush_pending_gunglines(void)
 	{
 		glp_ptr = pending_node->data;
 
+		scache_remove(glp_ptr->oper_server1);
+		if(glp_ptr->oper_server2)
+			scache_remove(glp_ptr->oper_server2);
 		rb_free(glp_ptr->reason1);
 		rb_free(glp_ptr->reason2);
 		rb_free(glp_ptr);

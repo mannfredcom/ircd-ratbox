@@ -741,10 +741,13 @@ set_default_conf(void)
 	ConfigFileEntry.default_adminstring = rb_strdup("is a Server Administrator");
 
 	ConfigFileEntry.failed_oper_notice = YES;
-	ConfigFileEntry.anti_nick_flood = NO;
+	ConfigFileEntry.anti_nick_flood = YES;
+	ConfigFileEntry.anti_away_flood = YES;
 	ConfigFileEntry.disable_fake_channels = NO;
 	ConfigFileEntry.max_nick_time = 20;
 	ConfigFileEntry.max_nick_changes = 5;
+	ConfigFileEntry.max_away_time = 30;
+	ConfigFileEntry.max_away_changes = 4;
 	ConfigFileEntry.max_accept = 20;
 	ConfigFileEntry.max_monitor = 60;
 	ConfigFileEntry.nick_delay = 900;	/* 15 minutes */
@@ -1230,8 +1233,6 @@ clear_out_old_conf(void)
 	free_null(ConfigFileEntry.fname_klinelog);
 	free_null(ConfigFileEntry.fname_operspylog);
 	free_null(ConfigFileEntry.fname_ioerrorlog);
-	free_null(ConfigFileEntry.motd_path);
-	free_null(ConfigFileEntry.oper_motd_path);
 	/* operator{} and class{} blocks are freed above */
 	/* clean out listeners */
 	close_listeners();

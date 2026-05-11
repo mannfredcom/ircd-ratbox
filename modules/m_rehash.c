@@ -42,6 +42,7 @@
 #include "hash.h"
 #include "cache.h"
 #include "s_auth.h"
+#include "scache.h"
 
 static int mo_rehash(struct Client *, struct Client *, int, const char **);
 
@@ -129,6 +130,9 @@ rehash_pglines(struct Client *source_p)
 	{
 		glp_ptr = ptr->data;
 
+		scache_remove(glp_ptr->oper_server1);
+		if(glp_ptr->oper_server2)
+			scache_remove(glp_ptr->oper_server2);
 		rb_free(glp_ptr->reason1);
 		rb_free(glp_ptr->reason2);
 		rb_free(glp_ptr);

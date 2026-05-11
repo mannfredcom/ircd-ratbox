@@ -245,9 +245,13 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 
 	/*
 	 * if we are connecting (Handshake), we already have the name from the
-	 * C:line in client_p->name
+	 * C:line in client_p->name (scache'd in serv_connect); release that
+	 * ref before interning the actual name sent in SERVER so we don't
+	 * accumulate an extra reference on every connect/split cycle, and so
+	 * the real server name (not the connect-block mask) is propagated.
 	 */
-
+	if(IsHandshake(client_p))
+		scache_remove(client_p->name);
 	client_p->name = scache_add(name);
 	set_server_gecos(client_p, info);
 	client_p->hopcount = hop;
@@ -1276,8 +1280,6 @@ server_estab(struct Client *client_p)
 		client_p->localClient->fullcaps = NULL;
 	}
 
-	/* add it to scache */
-	scache_add(client_p->name);
 	client_p->localClient->firsttime = rb_current_time();
 	/* fixing eob timings.. -gnp */
 

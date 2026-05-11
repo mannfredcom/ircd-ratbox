@@ -58,8 +58,9 @@ m_set_la_LDFLAGS =  -module $(MODULE_FLAGS)
 m_stats_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_svinfo_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_tb_la_LDFLAGS =  -module $(MODULE_FLAGS)  
-m_testline_la_LDFLAGS =  -module $(MODULE_FLAGS)  
-m_testmask_la_LDFLAGS =  -module $(MODULE_FLAGS)  
+m_testline_la_LDFLAGS =  -module $(MODULE_FLAGS)
+m_testmask_la_LDFLAGS =  -module $(MODULE_FLAGS)
+m_testrbl_la_LDFLAGS =  -module $(MODULE_FLAGS)
 m_time_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_topic_la_LDFLAGS =  -module $(MODULE_FLAGS)  
 m_trace_la_LDFLAGS =  -module $(MODULE_FLAGS)  
@@ -115,6 +116,7 @@ m_svinfo_la_SOURCES =	m_svinfo.c
 m_tb_la_SOURCES =	m_tb.c
 m_testline_la_SOURCES =	m_testline.c
 m_testmask_la_SOURCES =	m_testmask.c
+m_testrbl_la_SOURCES =	m_testrbl.c
 m_time_la_SOURCES =	m_time.c
 m_topic_la_SOURCES =	m_topic.c
 m_trace_la_SOURCES =	m_trace.c
@@ -169,8 +171,9 @@ m_set_la_LIBADD = $(MODULE_LIBS)
 m_stats_la_LIBADD = $(MODULE_LIBS)     
 m_svinfo_la_LIBADD = $(MODULE_LIBS)     
 m_tb_la_LIBADD = $(MODULE_LIBS)     
-m_testline_la_LIBADD = $(MODULE_LIBS)     
-m_testmask_la_LIBADD = $(MODULE_LIBS)     
+m_testline_la_LIBADD = $(MODULE_LIBS)
+m_testmask_la_LIBADD = $(MODULE_LIBS)
+m_testrbl_la_LIBADD = $(MODULE_LIBS)
 m_time_la_LIBADD = $(MODULE_LIBS)     
 m_topic_la_LIBADD = $(MODULE_LIBS)     
 m_trace_la_LIBADD = $(MODULE_LIBS)     
@@ -255,6 +258,7 @@ m_svinfo.la	\
 m_tb.la		\
 m_testline.la	\
 m_testmask.la	\
+m_testrbl.la	\
 m_time.la	\
 m_topic.la	\
 m_trace.la	\
@@ -377,6 +381,7 @@ m_svinfo.c	\
 m_tb.c		\
 m_testline.c	\
 m_testmask.c	\
+m_testrbl.c	\
 m_time.c	\
 m_topic.c	\
 m_trace.c	\

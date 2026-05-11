@@ -32,6 +32,13 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 AM_CPPFLAGS =
 AM_LDFLAGS =
+
+# libltdl is vendored upstream GNU libtool source. We don't maintain it
+# and won't be patching it for cleanliness, so silence all warnings from
+# this subdirectory rather than have them drown out warnings from our
+# own code.
+AM_CFLAGS = -w
+
 BUILT_SOURCES =
 include_HEADERS =
 noinst_LTLIBRARIES =

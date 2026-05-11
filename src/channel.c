@@ -515,12 +515,10 @@ is_banned(struct Channel *chptr, struct Client *who, struct membership *msptr, c
 #ifdef RB_IPV6
 	if(ConfigFileEntry.ipv6_tun_remap == true && GET_SS_FAMILY(&who->localClient->ip) == AF_INET6)
 	{
-		struct sockaddr_in in;
 		char ipv4[HOSTIPLEN];
-		
+
 		if(ipv4_from_ipv6_p((const struct sockaddr_in6 *)&who->localClient->ip, ipv4, sizeof(ipv4)) != NULL)
 		{
-			rb_inet_ntop_sock((struct sockaddr *)&in, ipv4, sizeof(ipv4));
 			snprintf(src_tunv4, sizeof(src_tunv4), "%s!%s@%s", who->name, who->username, ipv4);
 			s_tunv4 = src_tunv4;
 		}
@@ -532,9 +530,9 @@ is_banned(struct Channel *chptr, struct Client *who, struct membership *msptr, c
 		const char *banstr;
 		actualBan = ptr->data;
 		banstr = actualBan->banstr;
-		
-		if(match(banstr, s) || match(banstr, s2) || match_cidr(banstr, s2)   
-#ifdef RB_IPv6
+
+		if(match(banstr, s) || match(banstr, s2) || match_cidr(banstr, s2)
+#ifdef RB_IPV6
 		|| ((s_tunv4 != NULL) && (match(banstr, s_tunv4) || match_cidr(banstr, s_tunv4)))
 #endif
 		)

@@ -17,9 +17,9 @@ PASS            PING            PONG            POST
 PRIVMSG         QUIT            REHASH          RESTART
 RESV            SERVER          SET             SJOIN
 SQUIT           STATS           SVINFO          TESTGECOS
-TESTLINE        TESTMASK        TIME            TOPIC
-TRACE           UHELP           UMODE           UNDLINE
-UNGLINE         UNKLINE         UNREJECT        UNRESV
-UNXLINE         USER            USERHOST        USERS
-VERSION         WALLOPS         WHO             WHOIS
-WHOWAS          XLINE
+TESTLINE        TESTMASK        TESTRBL         TIME
+TOPIC           TRACE           UHELP           UMODE
+UNDLINE         UNGLINE         UNKLINE         UNREJECT
+UNRESV          UNXLINE         USER            USERHOST
+USERS           VERSION         WALLOPS         WHO
+WHOIS           WHOWAS          XLINE

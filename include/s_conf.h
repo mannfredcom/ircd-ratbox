@@ -141,11 +141,14 @@ struct config_file_entry
 	int dots_in_ident;
 	int failed_oper_notice;
 	int anti_nick_flood;
+	int anti_away_flood;
 	int anti_spam_exit_message_time;
 	int max_accept;
 	int max_monitor;
 	int max_nick_time;
 	int max_nick_changes;
+	int max_away_time;
+	int max_away_changes;
 	int ts_max_delta;
 	int ts_warn_delta;
 	int dline_with_reason;

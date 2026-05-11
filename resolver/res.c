@@ -730,8 +730,11 @@ proc_answer(struct reslist *request, HEADER * header, char *buf, char *eob)
 		rd_length = irc_ns_get16(current);
 		current += RDLENGTH_SIZE;
 
-		/* 
-		 * Wait to set request->type until we verify this structure 
+		if(rd_length > (size_t)(eob - (char *)current))
+			return (0);
+
+		/*
+		 * Wait to set request->type until we verify this structure
 		 */
 		switch (type)
 		{

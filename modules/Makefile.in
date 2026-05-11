@@ -260,7 +260,7 @@ am__libmodules_la_SOURCES_DIST = m_accept.c m_admin.c m_adminwall.c \
 	m_locops.c m_lusers.c m_map.c m_monitor.c m_motd.c m_names.c \
 	m_oper.c m_operspy.c m_pass.c m_ping.c m_pong.c m_post.c \
 	m_rehash.c m_restart.c m_resv.c m_set.c m_stats.c m_svinfo.c \
-	m_tb.c m_testline.c m_testmask.c m_time.c m_topic.c m_trace.c \
+	m_tb.c m_testline.c m_testmask.c m_testrbl.c m_time.c m_topic.c m_trace.c \
 	m_unreject.c m_user.c m_userhost.c m_version.c m_wallops.c \
 	m_who.c m_whois.c m_whowas.c m_xline.c core/m_die.c \
 	core/m_error.c core/m_join.c core/m_kick.c core/m_kill.c \
@@ -279,7 +279,7 @@ am__libmodules_la_SOURCES_DIST = m_accept.c m_admin.c m_adminwall.c \
 @STATIC_MODULES_TRUE@	m_pass.lo m_ping.lo m_pong.lo m_post.lo \
 @STATIC_MODULES_TRUE@	m_rehash.lo m_restart.lo m_resv.lo \
 @STATIC_MODULES_TRUE@	m_set.lo m_stats.lo m_svinfo.lo m_tb.lo \
-@STATIC_MODULES_TRUE@	m_testline.lo m_testmask.lo m_time.lo \
+@STATIC_MODULES_TRUE@	m_testline.lo m_testmask.lo m_testrbl.lo m_time.lo \
 @STATIC_MODULES_TRUE@	m_topic.lo m_trace.lo m_unreject.lo \
 @STATIC_MODULES_TRUE@	m_user.lo m_userhost.lo m_version.lo \
 @STATIC_MODULES_TRUE@	m_wallops.lo m_who.lo m_whois.lo \
@@ -637,13 +637,21 @@ m_testline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(m_testline_la_LDFLAGS) $(LDFLAGS) -o $@
 @STATIC_MODULES_FALSE@am_m_testline_la_rpath = -rpath $(modulesdir)
 m_testmask_la_DEPENDENCIES =
+m_testrbl_la_DEPENDENCIES =
 am__m_testmask_la_SOURCES_DIST = m_testmask.c
+am__m_testrbl_la_SOURCES_DIST = m_testrbl.c
 @STATIC_MODULES_FALSE@am_m_testmask_la_OBJECTS = m_testmask.lo
+@STATIC_MODULES_FALSE@am_m_testrbl_la_OBJECTS = m_testrbl.lo
 m_testmask_la_OBJECTS = $(am_m_testmask_la_OBJECTS)
+m_testrbl_la_OBJECTS = $(am_m_testrbl_la_OBJECTS)
 m_testmask_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_testmask_la_LDFLAGS) $(LDFLAGS) -o $@
+m_testrbl_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_testrbl_la_LDFLAGS) $(LDFLAGS) -o $@
 @STATIC_MODULES_FALSE@am_m_testmask_la_rpath = -rpath $(modulesdir)
+@STATIC_MODULES_FALSE@am_m_testrbl_la_rpath = -rpath $(modulesdir)
 m_time_la_DEPENDENCIES =
 am__m_time_la_SOURCES_DIST = m_time.c
 @STATIC_MODULES_FALSE@am_m_time_la_OBJECTS = m_time.lo
@@ -801,6 +809,7 @@ SOURCES = $(core_m_die_la_SOURCES) $(core_m_error_la_SOURCES) \
 	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
 	$(m_svinfo_la_SOURCES) $(m_tb_la_SOURCES) \
 	$(m_testline_la_SOURCES) $(m_testmask_la_SOURCES) \
+	$(m_testrbl_la_SOURCES) \
 	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
 	$(m_trace_la_SOURCES) $(m_unreject_la_SOURCES) \
 	$(m_user_la_SOURCES) $(m_userhost_la_SOURCES) \
@@ -845,6 +854,7 @@ DIST_SOURCES = $(am__core_m_die_la_SOURCES_DIST) \
 	$(am__m_stats_la_SOURCES_DIST) $(am__m_svinfo_la_SOURCES_DIST) \
 	$(am__m_tb_la_SOURCES_DIST) $(am__m_testline_la_SOURCES_DIST) \
 	$(am__m_testmask_la_SOURCES_DIST) \
+	$(am__m_testrbl_la_SOURCES_DIST) \
 	$(am__m_time_la_SOURCES_DIST) $(am__m_topic_la_SOURCES_DIST) \
 	$(am__m_trace_la_SOURCES_DIST) \
 	$(am__m_unreject_la_SOURCES_DIST) \
@@ -1105,6 +1115,7 @@ MODULE_FLAGS = $(EXTRA_FLAGS) -avoid-version
 @STATIC_MODULES_FALSE@m_tb_la_LDFLAGS = -module $(MODULE_FLAGS)  
 @STATIC_MODULES_FALSE@m_testline_la_LDFLAGS = -module $(MODULE_FLAGS)  
 @STATIC_MODULES_FALSE@m_testmask_la_LDFLAGS = -module $(MODULE_FLAGS)  
+@STATIC_MODULES_FALSE@m_testrbl_la_LDFLAGS = -module $(MODULE_FLAGS)
 @STATIC_MODULES_FALSE@m_time_la_LDFLAGS = -module $(MODULE_FLAGS)  
 @STATIC_MODULES_FALSE@m_topic_la_LDFLAGS = -module $(MODULE_FLAGS)  
 @STATIC_MODULES_FALSE@m_trace_la_LDFLAGS = -module $(MODULE_FLAGS)  
@@ -1159,6 +1170,7 @@ MODULE_FLAGS = $(EXTRA_FLAGS) -avoid-version
 @STATIC_MODULES_FALSE@m_tb_la_SOURCES = m_tb.c
 @STATIC_MODULES_FALSE@m_testline_la_SOURCES = m_testline.c
 @STATIC_MODULES_FALSE@m_testmask_la_SOURCES = m_testmask.c
+@STATIC_MODULES_FALSE@m_testrbl_la_SOURCES = m_testrbl.c
 @STATIC_MODULES_FALSE@m_time_la_SOURCES = m_time.c
 @STATIC_MODULES_FALSE@m_topic_la_SOURCES = m_topic.c
 @STATIC_MODULES_FALSE@m_trace_la_SOURCES = m_trace.c
@@ -1213,6 +1225,7 @@ MODULE_FLAGS = $(EXTRA_FLAGS) -avoid-version
 @STATIC_MODULES_FALSE@m_tb_la_LIBADD = $(MODULE_LIBS)     
 @STATIC_MODULES_FALSE@m_testline_la_LIBADD = $(MODULE_LIBS)     
 @STATIC_MODULES_FALSE@m_testmask_la_LIBADD = $(MODULE_LIBS)     
+@STATIC_MODULES_FALSE@m_testrbl_la_LIBADD = $(MODULE_LIBS)
 @STATIC_MODULES_FALSE@m_time_la_LIBADD = $(MODULE_LIBS)     
 @STATIC_MODULES_FALSE@m_topic_la_LIBADD = $(MODULE_LIBS)     
 @STATIC_MODULES_FALSE@m_trace_la_LIBADD = $(MODULE_LIBS)     
@@ -1292,6 +1305,7 @@ MODULE_FLAGS = $(EXTRA_FLAGS) -avoid-version
 @STATIC_MODULES_FALSE@m_tb.la		\
 @STATIC_MODULES_FALSE@m_testline.la	\
 @STATIC_MODULES_FALSE@m_testmask.la	\
+@STATIC_MODULES_FALSE@m_testrbl.la	\
 @STATIC_MODULES_FALSE@m_time.la	\
 @STATIC_MODULES_FALSE@m_topic.la	\
 @STATIC_MODULES_FALSE@m_trace.la	\
@@ -1378,6 +1392,7 @@ MODULE_FLAGS = $(EXTRA_FLAGS) -avoid-version
 @STATIC_MODULES_TRUE@m_tb.c		\
 @STATIC_MODULES_TRUE@m_testline.c	\
 @STATIC_MODULES_TRUE@m_testmask.c	\
+@STATIC_MODULES_TRUE@m_testrbl.c	\
 @STATIC_MODULES_TRUE@m_time.c	\
 @STATIC_MODULES_TRUE@m_topic.c	\
 @STATIC_MODULES_TRUE@m_trace.c	\
@@ -1767,8 +1782,11 @@ m_tb.la: $(m_tb_la_OBJECTS) $(m_tb_la_DEPENDENCIES) $(EXTRA_m_tb_la_DEPENDENCIES
 m_testline.la: $(m_testline_la_OBJECTS) $(m_testline_la_DEPENDENCIES) $(EXTRA_m_testline_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_testline_la_LINK) $(am_m_testline_la_rpath) $(m_testline_la_OBJECTS) $(m_testline_la_LIBADD) $(LIBS)
 
-m_testmask.la: $(m_testmask_la_OBJECTS) $(m_testmask_la_DEPENDENCIES) $(EXTRA_m_testmask_la_DEPENDENCIES) 
+m_testmask.la: $(m_testmask_la_OBJECTS) $(m_testmask_la_DEPENDENCIES) $(EXTRA_m_testmask_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(m_testmask_la_LINK) $(am_m_testmask_la_rpath) $(m_testmask_la_OBJECTS) $(m_testmask_la_LIBADD) $(LIBS)
+
+m_testrbl.la: $(m_testrbl_la_OBJECTS) $(m_testrbl_la_DEPENDENCIES) $(EXTRA_m_testrbl_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(m_testrbl_la_LINK) $(am_m_testrbl_la_rpath) $(m_testrbl_la_OBJECTS) $(m_testrbl_la_LIBADD) $(LIBS)
 
 m_time.la: $(m_time_la_OBJECTS) $(m_time_la_DEPENDENCIES) $(EXTRA_m_time_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_time_la_LINK) $(am_m_time_la_rpath) $(m_time_la_OBJECTS) $(m_time_la_LIBADD) $(LIBS)
@@ -1857,6 +1875,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_tb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_testline.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_testmask.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_testrbl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_time.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_topic.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_trace.Plo@am__quote@

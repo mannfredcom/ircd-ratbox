@@ -941,10 +941,12 @@ conf_set_serverinfo_nicklen(confentry_t * entry, conf_t * conf, struct conf_item
 			conf_report_error_nl
 				("serverinfo::nicklen -- Nicklen cannot exceed %u(set to %u) - modify #define NICKLEN in include/ircd_defs.h to increase and recompile",
 				 NICKLEN - 1, nicklen);
+			nicklen = NICKLEN - 1;
 		}
 		else if(nicklen < 9)
 		{
 			conf_report_error_nl("serverinfo::nicklen -- Invalid nicklen %u, must be at least 9", nicklen);
+			nicklen = DEFAULT_NICKLEN;
 		}
 		ServerInfo.nicklen = nicklen + 1;
 	}
@@ -2299,7 +2301,8 @@ conf_set_blacklist_aftype(confentry_t * entry, conf_t * conf, struct conf_items 
 		ipv4 = true;
 	}
 	else
-		conf_report_warning_nl("blacklist:aftype '%s' at %s:%d is unknown. assuming aftype = ipv4", aft, entry->filename, entry->line);
+		conf_report_warning_nl("%s:aftype '%s' at %s:%d is unknown. assuming aftype = ipv4",
+				       conf->confname, aft, entry->filename, entry->line);
 
 	rbl_set_aftype(t_rbl, ipv4, ipv6);
 }
@@ -2439,8 +2442,15 @@ load_conf_settings(void)
 		splitmode = false;
 		splitchecking = false;
 	}
-	whowas_set_size(ConfigFileEntry.whowas_length);	
+	whowas_set_size(ConfigFileEntry.whowas_length);
 	check_class();
+
+	if(!ConfigFileEntry.map_oper_only && ConfigServerHide.flatten_links)
+	{
+		conf_report_warning_nl(
+			"map_oper_only = no is overridden by serverhide::flatten_links = yes "
+			"for users without the shide_exempt auth flag.");
+	}
 }
 
 
@@ -2592,6 +2602,7 @@ static struct conf_items conf_general_table[] =
 	{ "tkline_expire_notices",	 CF_YESNO, NULL, 0, &ConfigFileEntry.tkline_expire_notices },
 
 	{ "anti_nick_flood",	CF_YESNO, NULL, 0, &ConfigFileEntry.anti_nick_flood	},
+	{ "anti_away_flood",	CF_YESNO, NULL, 0, &ConfigFileEntry.anti_away_flood	},
 	{ "burst_away",		CF_YESNO, NULL, 0, &ConfigFileEntry.burst_away		},
 	{ "caller_id_wait",	CF_TIME,  NULL, 0, &ConfigFileEntry.caller_id_wait	},
 	{ "client_exit",	CF_YESNO, NULL, 0, &ConfigFileEntry.client_exit		},
@@ -2615,6 +2626,8 @@ static struct conf_items conf_general_table[] =
 	{ "max_monitor",	CF_INT,	  NULL, 0, &ConfigFileEntry.max_monitor		},
 	{ "max_nick_time",	CF_TIME,  NULL, 0, &ConfigFileEntry.max_nick_time	},
 	{ "max_nick_changes",	CF_INT,	  NULL, 0, &ConfigFileEntry.max_nick_changes	},
+	{ "max_away_time",	CF_TIME,  NULL, 0, &ConfigFileEntry.max_away_time	},
+	{ "max_away_changes",	CF_INT,	  NULL, 0, &ConfigFileEntry.max_away_changes	},
 	{ "max_targets",	CF_INT,	  NULL, 0, &ConfigFileEntry.max_targets		},
 	{ "min_nonwildcard",	CF_INT,	  NULL, 0, &ConfigFileEntry.min_nonwildcard	},
 	{ "nick_delay",		CF_TIME,  NULL, 0, &ConfigFileEntry.nick_delay		},
@@ -2747,6 +2760,7 @@ static struct top_conf_table_t top_conf_table[] =
 	{ "connect",	conf_set_start_connect,	 conf_set_end_connect,	conf_connect_table,	1},
 	{ "shared",	conf_set_shared_cleanup, conf_set_shared_cleanup,conf_shared_table,	0},
 	{ "cluster",	conf_set_cluster_cleanup,conf_set_cluster_cleanup,conf_cluster_table,	0},
+	{ "blocklist",  conf_set_blacklist_start, conf_set_blacklist_end, conf_blacklist_table, 1},
 	{ "blacklist",  conf_set_blacklist_start, conf_set_blacklist_end, conf_blacklist_table, 1},
 #ifdef ENABLE_SERVICES
 	{ "service",	conf_set_service_start,	 NULL,			conf_service_table,	0},

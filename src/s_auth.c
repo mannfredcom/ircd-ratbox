@@ -90,7 +90,7 @@ typedef struct _rblquery
         rb_dlink_node node;
         struct AuthRequest *auth;
         rbl_t *rbl;
-        uint16_t queryid;
+        uint32_t queryid;
 } rblquery_t;
 
 
@@ -111,7 +111,9 @@ struct _rbl
 	rb_dlink_list answers;
 	int refcount;
 	uint8_t flags;
+	unsigned long queries;
 	unsigned long matches;
+	unsigned long misses;
 };
 
 typedef enum
@@ -670,14 +672,14 @@ rbl_destroy(rbl_t *t, bool freeing)
 }
 
 static char *
-rbl_string_v4(struct sockaddr *addr, const char *domain, char *dst, size_t dstsz)
+rbl_string_v4(const struct sockaddr *addr, const char *domain, char *dst, size_t dstsz)
 {
-	uint8_t *cp;
+	const uint8_t *cp;
 	size_t ret;
 	if(addr->sa_family != AF_INET)
 	        return NULL;
-	
-        cp = (uint8_t *)&((struct sockaddr_in *)addr)->sin_addr.s_addr;
+
+        cp = (const uint8_t *)&((const struct sockaddr_in *)addr)->sin_addr.s_addr;
 	ret = snprintf(dst, dstsz, "%u.%u.%u.%u.%s", (unsigned int)cp[3], (unsigned int)cp[2], 
 			(unsigned int)cp[1], (unsigned int)cp[0], domain);
 	if(ret >= dstsz)
@@ -686,14 +688,14 @@ rbl_string_v4(struct sockaddr *addr, const char *domain, char *dst, size_t dstsz
 }
 
 static char *
-rbl_string_v6(struct sockaddr *addr, const char *domain, char *dst, size_t dstsz)
+rbl_string_v6(const struct sockaddr *addr, const char *domain, char *dst, size_t dstsz)
 {
-	uint8_t *cp;
+	const uint8_t *cp;
 	size_t ret;
 	if(addr->sa_family != AF_INET6)
 		return NULL;
-	
-	cp = (uint8_t *)&((struct sockaddr_in6 *)addr)->sin6_addr.s6_addr;
+
+	cp = (const uint8_t *)&((const struct sockaddr_in6 *)addr)->sin6_addr.s6_addr;
 	
 	ret = snprintf(dst, dstsz, 
 			"%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x."
@@ -723,7 +725,7 @@ rbl_string_v6(struct sockaddr *addr, const char *domain, char *dst, size_t dstsz
 
 
 static char *
-rbl_string(struct sockaddr *addr, const char *domain, char *dst, size_t dstsz)
+rbl_string(const struct sockaddr *addr, const char *domain, char *dst, size_t dstsz)
 {
 	switch(addr->sa_family)
 	{
@@ -789,6 +791,7 @@ rbl_dns_callback(const char *result, int status, int aftype, void *data)
 	struct Client *client;
 	struct in_addr in;
 	rb_dlink_node *ptr;
+	bool matched = false;
 
 	auth = query->auth;
 	client = auth->client;
@@ -812,12 +815,14 @@ rbl_dns_callback(const char *result, int status, int aftype, void *data)
 			if(c == val)
 			{
 				rbl_set_banned(auth, query->rbl->rblname, res->answer);
-				goto cleanup;	 
+				matched = true;
+				goto cleanup;
 			}
-		} 
+		}
 		if(match(mask, result) || match_ips(mask, result))
 		{
 			rbl_set_banned(auth, query->rbl->rblname, res->answer);
+			matched = true;
 			goto cleanup;
 		}
         }
@@ -825,18 +830,23 @@ rbl_dns_callback(const char *result, int status, int aftype, void *data)
 	if(rbl_ismatchother(query->rbl))
 	{
 		const char *reason = query->rbl->mo_answer;
-		
+
 		if(EmptyString(reason))
 			reason = "IP Address: ${ip} banned by RBL";
 		rbl_set_banned(auth, query->rbl->rblname, reason);
-	}	
+		matched = true;
+	}
 
 cleanup:
+	if(matched)
+		query->rbl->matches++;
+	else
+		query->rbl->misses++;
         rbl_detach_rbl_from_query(query);
 	rb_dlinkDelete(&query->node, &auth->rbl_queries);
         rb_free(query);
         rbl_release_auth(auth);
-        
+
 }
 
 #define RBL_HOSTLEN 255
@@ -860,10 +870,10 @@ rbl_check_rbls(struct AuthRequest *auth)
 		rbl_t *t = ptr->data;
 		int safamily = GET_SS_FAMILY(&auth->client->localClient->ip);
 
-		if(safamily == AF_INET6 && rbl_isv6(t) != true)
+		if(safamily == AF_INET6 && rbl_isv6(t) == false)
 			continue;
-		
-		if(safamily == AF_INET && rbl_isv4(t) != true)
+
+		if(safamily == AF_INET && rbl_isv4(t) == false)
 			continue;
 			
 		if(rbl_string((struct sockaddr *)&auth->client->localClient->ip, t->rblname, hostbuf, sizeof(hostbuf)) == NULL)
@@ -873,6 +883,15 @@ rbl_check_rbls(struct AuthRequest *auth)
                 query->auth = auth;
                 rbl_attach_rbl_to_query(query, t);
                 rb_dlinkAdd(query, &query->node, &auth->rbl_queries);
+		/* Bump counter BEFORE lookup_hostname. lookup_hostname() can
+		 * synchronously fire rbl_dns_callback via failed_resolver()
+		 * when the resolver helper is unavailable; the callback
+		 * detaches the query which decrements t->refcount, and if the
+		 * zone was rbl_isfreeing() (e.g. a rehash removed it while an
+		 * earlier query still held a ref) reaching refcount==0 at that
+		 * point triggers rbl_destroy(t, false). A post-lookup t->queries
+		 * bump would then dereference freed memory. */
+		t->queries++;
 		query->queryid = lookup_hostname(hostbuf, AF_INET, rbl_dns_callback, query);
         }
 
@@ -904,6 +923,346 @@ rbl_clear_rbllists(void)
         	rbl_t *rbl = ptr->data;
         	rbl_destroy(rbl, true);
         }
+}
+
+void
+rbl_dump_stats(rbl_stats_cb cb, void *arg)
+{
+	rb_dlink_node *ptr;
+	RB_DLINK_FOREACH(ptr, rbl_lists.head)
+	{
+		rbl_t *t = ptr->data;
+		cb(t->rblname, t->queries, t->matches, t->misses, arg);
+	}
+}
+
+/* TESTRBL: oper-initiated spot-check of a single IP against all RBL zones.
+ * Reuses the RBL infrastructure but does NOT mutate auth state; this is
+ * a diagnostic path, not a real connection-time check. */
+
+#define TESTRBL_TIMEOUT 10
+
+typedef struct _testrbl_session
+{
+	char source_uid[IDLEN + 1];
+	char target_str[HOSTIPLEN];
+	rb_dlink_list queries;
+	int pending;
+	rb_ev_entry *timer;
+	bool cancelled;
+	bool dispatching;
+} testrbl_session_t;
+
+typedef struct _testrbl_query
+{
+	rb_dlink_node node;
+	testrbl_session_t *session;
+	rbl_t *rbl;
+	uint32_t queryid;
+	char zonename[256];
+	bool sync_completed;
+} testrbl_query_t;
+
+static void testrbl_dns_callback(const char *result, int status, int aftype, void *data);
+static void testrbl_timeout_cb(void *data);
+static void testrbl_finish_if_done(testrbl_session_t *s);
+
+static struct Client *
+testrbl_live_source(testrbl_session_t *s)
+{
+	if(s->cancelled)
+		return NULL;
+	return find_id(s->source_uid);
+}
+
+static void
+testrbl_free_query(testrbl_query_t *q)
+{
+	testrbl_session_t *s = q->session;
+	rb_dlinkDelete(&q->node, &s->queries);
+	q->rbl->refcount--;
+	if(rbl_isfreeing(q->rbl) && q->rbl->refcount == 0)
+		rbl_destroy(q->rbl, false);
+	rb_free(q);
+}
+
+void
+rbl_run_test(struct Client *source_p, const struct sockaddr *addr, const char *ipstr)
+{
+	char hostbuf[RBL_HOSTLEN];
+	testrbl_session_t *s;
+	rb_dlink_node *ptr;
+	int dispatched = 0;
+
+	if(rb_dlink_list_length(&rbl_lists) == 0)
+	{
+		sendto_one_notice(source_p,
+				  ":TESTRBL %s: no RBL zones configured", ipstr);
+		return;
+	}
+
+	s = rb_malloc(sizeof(*s));
+	rb_strlcpy(s->source_uid, source_p->id, sizeof(s->source_uid));
+	rb_strlcpy(s->target_str, ipstr, sizeof(s->target_str));
+	/* Guard reference: lookup_hostname() can complete synchronously via
+	 * failed_resolver() when the resolver helper is unavailable, firing
+	 * testrbl_dns_callback() mid-loop. Without this guard a synchronous
+	 * last-query would drive s->pending to 0 and free the session under
+	 * our feet. The guard is released after the dispatch loop.
+	 */
+	s->pending = 1;
+	/* While this flag is set, the callback marks q->sync_completed
+	 * instead of freeing q, so we can safely write q->queryid after
+	 * lookup_hostname() returns even on the synchronous-fail path.
+	 */
+	s->dispatching = true;
+
+	RB_DLINK_FOREACH(ptr, rbl_lists.head)
+	{
+		rbl_t *t = ptr->data;
+		testrbl_query_t *q;
+		uint32_t qid;
+
+		if(GET_SS_FAMILY(addr) == AF_INET && !rbl_isv4(t))
+			continue;
+		if(GET_SS_FAMILY(addr) == AF_INET6 && !rbl_isv6(t))
+			continue;
+
+		if(rbl_string(addr, t->rblname, hostbuf, sizeof(hostbuf)) == NULL)
+			continue;
+
+		q = rb_malloc(sizeof(*q));
+		q->session = s;
+		q->rbl = t;
+		t->refcount++;
+		rb_strlcpy(q->zonename, t->rblname, sizeof(q->zonename));
+		rb_dlinkAdd(q, &q->node, &s->queries);
+		s->pending++;
+		dispatched++;
+		qid = lookup_hostname(hostbuf, AF_INET, testrbl_dns_callback, q);
+		if(q->sync_completed)
+		{
+			/* Callback fired synchronously; clean up here rather
+			 * than in the callback, so we never write through
+			 * a dangling q pointer. */
+			testrbl_free_query(q);
+			s->pending--;
+		}
+		else
+		{
+			q->queryid = qid;
+		}
+	}
+
+	s->dispatching = false;
+
+	if(dispatched == 0)
+	{
+		sendto_one_notice(source_p,
+				  ":TESTRBL %s: no applicable zones for this address family",
+				  ipstr);
+		/* Guard is the only outstanding reference; drop it and free. */
+		s->pending = 0;
+		rb_free(s);
+		return;
+	}
+
+	sendto_one_notice(source_p,
+			  ":TESTRBL %s: dispatched %d %s, %ds timeout",
+			  s->target_str, dispatched,
+			  dispatched == 1 ? "query" : "queries",
+			  TESTRBL_TIMEOUT);
+
+	/* Schedule timeout before releasing the guard. If every query
+	 * completed synchronously during the dispatch loop, releasing the
+	 * guard will drive pending to 0 and testrbl_finish_if_done() will
+	 * cancel this timer and free s. Otherwise the timer protects any
+	 * outstanding async queries.
+	 */
+	s->timer = rb_event_addonce("testrbl_timeout", testrbl_timeout_cb, s, TESTRBL_TIMEOUT);
+
+	/* Release guard. May free s; do not touch it after this. */
+	s->pending--;
+	testrbl_finish_if_done(s);
+}
+
+static void
+testrbl_dns_callback(const char *result, int status, int aftype, void *data)
+{
+	testrbl_query_t *q = data;
+	testrbl_session_t *s = q->session;
+	struct Client *source_p = testrbl_live_source(s);
+	struct in_addr in;
+	rb_dlink_node *ptr;
+	const char *reason = NULL;
+
+	if(source_p == NULL)
+		goto cleanup;
+
+	if(status != 1)
+	{
+		/* Two failure paths feed this callback with status!=1:
+		 *
+		 *  - failed_resolver() in src/dns.c, invoked when the resolver
+		 *    helper itself is unavailable. Calls cb("FAILED", 0, 0, ...)
+		 *    DIRECTLY, bypassing results_callback and its aftype
+		 *    coercion. This is the only path where aftype == 0 reaches
+		 *    us, so that is a reliable ERROR signal.
+		 *
+		 *  - Normal NXDOMAIN / no-answer via the resolver helper.
+		 *    resolver/resolver.c:send_answer emits result="FAILED",
+		 *    result_code=0, aftype=0, but src/dns.c:results_callback
+		 *    coerces aftype=0 to AF_INET before calling us. So checking
+		 *    result=="FAILED" would over-match onto CLEAN zones.
+		 */
+		if(aftype == 0)
+			sendto_one_notice(source_p,
+					  ":TESTRBL %s: %s - ERROR (resolver helper unavailable)",
+					  s->target_str, q->zonename);
+		else
+			sendto_one_notice(source_p,
+					  ":TESTRBL %s: %s - CLEAN (no listing)",
+					  s->target_str, q->zonename);
+		goto cleanup;
+	}
+
+	if(aftype != AF_INET)
+	{
+		/* Defensive: we always query AF_INET, so a non-INET reply is
+		 * a protocol oddity rather than a normal RBL response. */
+		sendto_one_notice(source_p,
+				  ":TESTRBL %s: %s - unexpected address family in reply",
+				  s->target_str, q->zonename);
+		goto cleanup;
+	}
+
+	if(rb_inet_pton(AF_INET, result, &in) != 1)
+	{
+		sendto_one_notice(source_p,
+				  ":TESTRBL %s: %s - malformed response (%s)",
+				  s->target_str, q->zonename, result);
+		goto cleanup;
+	}
+
+	RB_DLINK_FOREACH(ptr, q->rbl->answers.head)
+	{
+		rbl_answer_t *res = ptr->data;
+		const char *mask = res->mask;
+
+		if(IsDigit(mask[0]) && mask[1] == '\0')
+		{
+			uint8_t val = (uint8_t)atoi(mask);
+			uint8_t c = ((uint8_t *)&in.s_addr)[3];
+			if(c == val)
+			{
+				reason = res->answer;
+				break;
+			}
+		}
+		if(match(mask, result) || match_ips(mask, result))
+		{
+			reason = res->answer;
+			break;
+		}
+	}
+
+	if(reason == NULL && rbl_ismatchother(q->rbl))
+	{
+		reason = EmptyString(q->rbl->mo_answer)
+			? "IP Address: ${ip} banned by RBL"
+			: q->rbl->mo_answer;
+	}
+
+	if(reason != NULL)
+	{
+		rb_dlink_list varlist = { NULL, NULL, 0 };
+		const char *expanded;
+
+		substitution_append_var(&varlist, "nick", "(test)");
+		substitution_append_var(&varlist, "ip", s->target_str);
+		substitution_append_var(&varlist, "host", s->target_str);
+		substitution_append_var(&varlist, "dnsbl-host", q->zonename);
+		substitution_append_var(&varlist, "network-name", ServerInfo.network_name);
+		expanded = substitution_parse(reason, &varlist);
+
+		sendto_one_notice(source_p,
+				  ":TESTRBL %s: %s - MATCH reply=%s - %s",
+				  s->target_str, q->zonename, result, expanded);
+		substitution_free(&varlist);
+	}
+	else
+	{
+		sendto_one_notice(source_p,
+				  ":TESTRBL %s: %s - reply=%s (no configured match rule hit)",
+				  s->target_str, q->zonename, result);
+	}
+
+cleanup:
+	if(s->dispatching)
+	{
+		/* Synchronous invocation from inside rbl_run_test's dispatch
+		 * loop (failed_resolver path). Do not free q or decrement
+		 * pending here — the caller checks sync_completed and cleans
+		 * up after lookup_hostname() returns, avoiding a write-after-
+		 * free when the caller stores q->queryid.
+		 */
+		q->sync_completed = true;
+		return;
+	}
+	testrbl_free_query(q);
+	s->pending--;
+	testrbl_finish_if_done(s);
+}
+
+static void
+testrbl_finish_if_done(testrbl_session_t *s)
+{
+	struct Client *source_p;
+
+	if(s->pending > 0)
+		return;
+
+	source_p = testrbl_live_source(s);
+	if(source_p != NULL)
+		sendto_one_notice(source_p,
+				  ":TESTRBL %s: End of /TESTRBL", s->target_str);
+
+	if(s->timer != NULL)
+	{
+		rb_event_delete(s->timer);
+		s->timer = NULL;
+	}
+	rb_free(s);
+}
+
+static void
+testrbl_timeout_cb(void *data)
+{
+	testrbl_session_t *s = data;
+	struct Client *source_p;
+	rb_dlink_node *ptr, *next;
+
+	s->timer = NULL;
+	s->cancelled = true;
+	source_p = find_id(s->source_uid);
+
+	RB_DLINK_FOREACH_SAFE(ptr, next, s->queries.head)
+	{
+		testrbl_query_t *q = ptr->data;
+		if(source_p != NULL)
+			sendto_one_notice(source_p,
+					  ":TESTRBL %s: %s - TIMEOUT after %ds",
+					  s->target_str, q->zonename, TESTRBL_TIMEOUT);
+		cancel_lookup(q->queryid);
+		testrbl_free_query(q);
+	}
+
+	if(source_p != NULL)
+		sendto_one_notice(source_p,
+				  ":TESTRBL %s: End of /TESTRBL (with timeouts)",
+				  s->target_str);
+
+	rb_free(s);
 }
 
 static void

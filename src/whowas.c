@@ -36,6 +36,7 @@
 #include "client.h"
 #include "send.h"
 #include "s_log.h"
+#include "scache.h"
 
 struct whowas_top
 {
@@ -132,8 +133,8 @@ whowas_add_history(struct Client *client_p, bool online)
 			rb_strlcpy(who->sockhost, client_p->sockhost, sizeof(who->sockhost));
 	}
 
-	/* this is safe do to with the servername cache */
-	who->servername = client_p->servptr->name;
+	/* hold a scache ref for the lifetime of this whowas entry */
+	who->servername = scache_add(client_p->servptr->name);
 
 	if(online == true)
 	{
@@ -204,6 +205,7 @@ whowas_trim(void *unused)
 			rb_dlinkDelete(&twho->wnode, &twho->wtop->wwlist);
 			rb_dlinkDelete(&twho->whowas_node, whowas_list);
 			whowas_free_wtop(twho->wtop);
+			scache_remove(twho->servername);
 			rb_free(twho);
 		}
 	}

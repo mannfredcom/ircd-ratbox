@@ -296,8 +296,14 @@ static struct InfoStruct info_table[] = {
 	{
 		"anti_nick_flood",
 		OUTPUT_BOOLEAN,
-		{ &ConfigFileEntry.anti_nick_flood }, 
+		{ &ConfigFileEntry.anti_nick_flood },
 		"NICK flood protection"
+	},
+	{
+		"anti_away_flood",
+		OUTPUT_BOOLEAN,
+		{ &ConfigFileEntry.anti_away_flood },
+		"AWAY flood protection"
 	},
 	{
 		"anti_spam_exit_message_time",
@@ -537,14 +543,26 @@ static struct InfoStruct info_table[] = {
 	{
 		"max_nick_changes",
 		OUTPUT_DECIMAL,
-		{ &ConfigFileEntry.max_nick_changes }, 
+		{ &ConfigFileEntry.max_nick_changes },
 		"NICK change threshhold setting"
 	},
 	{
 		"max_nick_time",
 		OUTPUT_DECIMAL,
-		{ &ConfigFileEntry.max_nick_time }, 
+		{ &ConfigFileEntry.max_nick_time },
 		"NICK flood protection time interval"
+	},
+	{
+		"max_away_changes",
+		OUTPUT_DECIMAL,
+		{ &ConfigFileEntry.max_away_changes },
+		"AWAY change threshold setting"
+	},
+	{
+		"max_away_time",
+		OUTPUT_DECIMAL,
+		{ &ConfigFileEntry.max_away_time },
+		"AWAY flood protection time interval"
 	},
 	{
 		"max_targets",

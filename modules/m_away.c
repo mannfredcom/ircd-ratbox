@@ -78,6 +78,45 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(!IsClient(source_p))
 		return 0;
 
+	/* Defensive rate limit on local AWAY changes. Mirrors the
+	 * anti_nick_flood pattern (sliding window of max_away_changes
+	 * within max_away_time seconds). Opers exempt. */
+	if(MyClient(source_p) && ConfigFileEntry.anti_away_flood && !IsOper(source_p))
+	{
+		bool changes_state;
+
+		/* Only count commands that visibly change away state, so
+		 * a script that defensively re-asserts the current state
+		 * doesn't get throttled. strncmp(..., AWAYLEN) so a
+		 * truncated stored value compares equal to the same
+		 * prefix of an over-length new value (rb_strndup
+		 * truncates parv[1] to AWAYLEN). */
+		if(parc < 2 || EmptyString(parv[1]))
+			changes_state = (source_p->user->away != NULL);
+		else if(source_p->user->away == NULL)
+			changes_state = true;
+		else
+			changes_state = (strncmp(source_p->user->away, parv[1], AWAYLEN) != 0);
+
+		if(changes_state)
+		{
+			if((source_p->localClient->last_away_change + ConfigFileEntry.max_away_time) <
+			   rb_current_time())
+				source_p->localClient->number_of_away_changes = 0;
+
+			if(source_p->localClient->number_of_away_changes >= (unsigned int)ConfigFileEntry.max_away_changes)
+			{
+				sendto_one_notice(source_p,
+						  ":*** Away change too fast, please wait %d seconds",
+						  ConfigFileEntry.max_away_time);
+				return 0;
+			}
+
+			source_p->localClient->last_away_change = rb_current_time();
+			source_p->localClient->number_of_away_changes++;
+		}
+	}
+
 	if(parc < 2 || EmptyString(parv[1]))
 	{
 		/* Marking as not away */
@@ -109,6 +148,10 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	{
 		rb_free(source_p->user->away);
 		source_p->user->away = rb_strndup(parv[1], AWAYLEN);
+		sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+			      ":%s AWAY :%s", use_id(source_p), source_p->user->away);
+		sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
+			      ":%s AWAY :%s", source_p->name, source_p->user->away);
 	}
 
 	if(MyConnect(source_p))

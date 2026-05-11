@@ -111,12 +111,12 @@ allocate_ssl_daemon(rb_fde_t * F, rb_fde_t * P, int pid)
 static void
 free_ssl_daemon(ssl_ctl_t * ctl)
 {
-	rb_dlink_node *ptr;
+	rb_dlink_node *ptr, *next;
 	int x;
 	if(ctl->cli_count)
 		return;
 
-	RB_DLINK_FOREACH(ptr, ctl->readq.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next, ctl->readq.head)
 	{
 		ssl_ctl_buf_t *ctl_buf = ptr->data;
 		for(x = 0; x < ctl_buf->nfds; x++)
@@ -126,7 +126,7 @@ free_ssl_daemon(ssl_ctl_t * ctl)
 		rb_free(ctl_buf);
 	}
 
-	RB_DLINK_FOREACH(ptr, ctl->writeq.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next, ctl->writeq.head)
 	{
 		ssl_ctl_buf_t *ctl_buf = ptr->data;
 		for(x = 0; x < ctl_buf->nfds; x++)

@@ -523,6 +523,10 @@ rb_setup_ssl_server(const char *cacert, const char *cert, const char *keyfile, c
 
 	SSL_CTX_set_options(sctx->ssl_ctx, tls_opts);
 
+#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10101000L
+	SSL_CTX_set_num_tickets(sctx->ssl_ctx, 0);
+#endif
+
 
 	if(ssl_cipher_list != NULL)
 		ciphers = ssl_cipher_list;
@@ -886,7 +890,29 @@ rb_get_pseudo_random(void *buf, size_t length)
 const char *
 rb_ssl_get_strerror(rb_fde_t *F)
 {
-	return ERR_error_string(F->sslerr.ssl_errno, NULL);
+	unsigned long e = F->sslerr.ssl_errno;
+	const char *reason;
+
+	if(e == 0)
+		return "unknown SSL error";
+
+	/* ERR_error_string() produces "error:HEX:library:func(N):reason",
+	 * which leaks internal codes into user-visible quit messages.
+	 * Prefer the bare reason text.
+	 */
+	reason = ERR_reason_error_string(e);
+	if(reason != NULL && *reason != '\0')
+		return reason;
+
+#ifdef ERR_LIB_SYS
+	/* LibreSSL and older OpenSSL pack syscall errors as
+	 * ERR_LIB_SYS with errno in the reason slot — translate back.
+	 */
+	if(ERR_GET_LIB(e) == ERR_LIB_SYS)
+		return strerror((int)ERR_GET_REASON(e));
+#endif
+
+	return ERR_error_string(e, NULL);
 }
 
 int

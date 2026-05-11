@@ -92,9 +92,33 @@ modinit(void)
 }
 
 static void
+flush_pending_glines(void)
+{
+	rb_dlink_node *pending_node;
+	rb_dlink_node *next_node;
+	struct gline_pending *glp_ptr;
+
+	RB_DLINK_FOREACH_SAFE(pending_node, next_node, pending_glines.head)
+	{
+		glp_ptr = pending_node->data;
+		scache_remove(glp_ptr->oper_server1);
+		if(glp_ptr->oper_server2)
+			scache_remove(glp_ptr->oper_server2);
+		rb_free(glp_ptr->reason1);
+		rb_free(glp_ptr->reason2);
+		rb_free(glp_ptr);
+		rb_dlinkDestroy(pending_node, &pending_glines);
+	}
+}
+
+static void
 moddeinit(void)
 {
 	rb_event_delete(pending_gline_ev);
+	if(rb_dlink_list_length(&pending_glines) > 0)
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "Discarding pending glines because of module unload");
+	flush_pending_glines();
 }
 
 /* mo_gline()
@@ -825,6 +849,9 @@ expire_pending_glines(void *unused)
 		    rb_current_time()) || find_is_glined(glp_ptr->host, glp_ptr->user))
 
 		{
+			scache_remove(glp_ptr->oper_server1);
+			if(glp_ptr->oper_server2)
+				scache_remove(glp_ptr->oper_server2);
 			rb_free(glp_ptr->reason1);
 			rb_free(glp_ptr->reason2);
 			rb_free(glp_ptr);

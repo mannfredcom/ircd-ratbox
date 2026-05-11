@@ -155,6 +155,9 @@ struct LocalUser
 
 	time_t last_nick_change;
 
+	time_t last_away_change;
+	unsigned int number_of_away_changes;
+
 
 	/* challenge stuff */
 	uint8_t *chal_resp;

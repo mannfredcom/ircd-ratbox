@@ -26,5 +26,6 @@
 #define INCLUDED_scache_h
 
 const char *scache_add(const char *name);
+void scache_remove(const char *name);
 void count_scache(size_t *, size_t *);
 #endif

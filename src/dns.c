@@ -115,28 +115,42 @@ check_resolver(void)
 }
 
 static void
-failed_resolver(uint32_t xid)
+do_failed_resolver(void *data)
 {
+	uint32_t xid = *(uint32_t *)data;
 	struct dnsreq *req;
 	DNSCB *cb;
-	void *data;
+	void *cbdata;
 	uint32_t hashv;
 
-	req = get_request_from_id(xid);
+	rb_free(data);
 
+	req = get_request_from_id(xid);
 	if(req == NULL)
 		return;
 
 	cb = req->callback;
-	data = req->data;
-	hashv = req->hashv;	
-	
+	cbdata = req->data;
+	hashv = req->hashv;
+
 	rb_dlinkDelete(&req->node, &query_hash[hashv]);
 	rb_free(req);
 
 	if(cb != NULL)
-		cb("FAILED", 0, 0, data);
-	
+		cb("FAILED", 0, 0, cbdata);
+}
+
+static void
+failed_resolver(uint32_t xid)
+{
+	uint32_t *id;
+
+	if(get_request_from_id(xid) == NULL)
+		return;
+
+	id = rb_malloc(sizeof(*id));
+	*id = xid;
+	rb_event_addonce("do_failed_resolver", do_failed_resolver, id, 0);
 }
 
 void

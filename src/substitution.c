@@ -143,7 +143,7 @@ char *substitution_parse(const char *fmt, rb_dlink_list *varlist)
 				if (!strcasecmp(varname, val->name))
 				{
 					rb_strlcpy(bptr, val->value, IRCD_BUFSIZE - (bptr - buf));
-					bptr += strlen(val->value);
+					bptr += strlen(bptr);
 					break;
 				}
 			}

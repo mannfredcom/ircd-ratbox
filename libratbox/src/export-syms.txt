@@ -129,7 +129,6 @@ rb_ssl_last_handshake
 rb_ssl_start_accepted
 rb_ssl_start_connected
 rb_string_to_array
-rb_strnlen
 rb_strtok_r
 rb_supports_ssl
 rb_vsnprintf_append

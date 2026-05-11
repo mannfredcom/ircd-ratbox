@@ -609,10 +609,11 @@ destroy_fake_server(struct Client *fake_p, int send_squit)
 						me.name, fake_p->name);
 	
 	hash_del(HASH_CLIENT, fake_p->name, fake_p);
-	
+	scache_remove(fake_p->name);
+
 	rb_dlinkDelete(&fake_p->node, &global_client_list);
 	rb_dlinkFindDestroy(fake_p, &global_serv_list);
-	
+
 	rb_free(fake_p->serv);
 	rb_free(fake_p->localClient);
 	rb_free(fake_p);

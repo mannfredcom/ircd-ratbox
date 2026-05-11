@@ -1,0 +1,51 @@
+TESTRBL <ip>
+
+Spot-checks a single IPv4 or IPv6 address against every
+configured blocklist{} (DNSBL/RBL) zone, without affecting
+any client. Useful for verifying that a zone is reachable,
+that a known-bad address is being flagged, or that a
+false-positive complaint is reproducible.
+
+For each configured zone the server dispatches an
+asynchronous DNS query and emits one notice. The notice
+text is prefixed "TESTRBL <ip>: <zone> - " followed by:
+
+  MATCH reply=<addr> - <reason>
+                Zone returned a record matching one of the
+                configured answer masks; the substituted
+                ban reason is shown.
+  reply=<addr> (no configured match rule hit)
+                Zone returned an answer but it did not
+                match any configured answer{} mask and the
+                zone is not configured matchother.
+  CLEAN (no listing)
+                The zone did not return a positive
+                listing. In the typical case this is
+                NXDOMAIN; the resolver also reports it
+                this way for some other non-success
+                conditions (e.g. forward/reverse address
+                mismatch, oversized hostname). Treat as
+                "not banned by this zone" but do not
+                read it as an authoritative negative.
+  ERROR (resolver helper unavailable)
+                The resolver helper rejected the lookup
+                (typically because the helper is down).
+  unexpected address family in reply
+                Zone returned a non-IPv4 record (protocol
+                oddity, not a normal RBL response).
+  malformed response (<text>)
+                Zone returned a response that did not
+                parse as an IPv4 address.
+  TIMEOUT after <N>s
+                No answer within the per-session timeout.
+
+A terminating notice is sent once every zone has answered
+or timed out:
+
+  End of /TESTRBL
+  End of /TESTRBL (with timeouts)   (one or more timed out)
+
+Reuses the normal RBL lookup path but does not modify the
+issuing oper's connection state and does not ban anyone.
+
+See also: STATS n (per-zone query/match/miss counters).

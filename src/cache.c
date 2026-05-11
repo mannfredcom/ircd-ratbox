@@ -209,7 +209,19 @@ free_cachefile(struct cachefile *cacheptr)
 	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, cacheptr->contents.head)
 	{
 		if(ptr->data != &emptyline)
+		{
+			/* linenode is embedded in the cacheline, so freeing
+			 * the cacheline frees the dlink_node with it. */
 			rb_free(ptr->data);
+		}
+		else
+		{
+			/* empty lines are added via rb_dlinkAddTailAlloc,
+			 * which allocates a standalone dlink_node pointing at
+			 * the shared static `emptyline`. Free that node here;
+			 * the static is left alone. */
+			rb_free(ptr);
+		}
 	}
 
 	rb_free(cacheptr);

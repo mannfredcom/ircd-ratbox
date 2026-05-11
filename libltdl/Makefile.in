@@ -419,6 +419,12 @@ top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
+# libltdl is vendored upstream GNU libtool source. We don't maintain it
+# and won't be patching it for cleanliness, so silence all warnings from
+# this subdirectory rather than have them drown out warnings from our
+# own code.
+AM_CFLAGS = -w
+
 # -I$(srcdir) is needed for user that built libltdl with a sub-Automake
 # (not as a sub-package!) using 'nostdinc':
 AM_CPPFLAGS = -DLT_CONFIG_H='<$(LT_CONFIG_H)>' -DLTDL -I. -I$(srcdir) \

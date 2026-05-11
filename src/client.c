@@ -228,6 +228,8 @@ free_client(struct Client *client_p)
 	s_assert(NULL != client_p);
 	s_assert(&me != client_p);
 	rb_free(client_p->certfp);
+	if(IsAnyServer(client_p))
+		scache_remove(client_p->name);
 	free_local_client(client_p);
 	rb_free(client_p);
 }

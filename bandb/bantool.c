@@ -741,6 +741,16 @@ check_schema(void)
 		NULL
 	};
 
+	/* bandb_table[] deliberately repeats each table name twice (one
+	 * base and one .perm slot per type); the explicit `i++` at the
+	 * end of the body is intentional — we want to advance past the
+	 * .perm duplicate once we've processed the base entry. clang's
+	 * -Wfor-loop-analysis flags this as the variable being incremented
+	 * in both header and body; silence it. */
+#if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wfor-loop-analysis"
+#endif
 	for(i = 0; i < BANDB_LAST_TYPE; i++)
 	{
 		if(!table_exists(bandb_table[i]))
@@ -771,6 +781,9 @@ check_schema(void)
 
 		i++;		/* skip over .perm */
 	}
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#endif
 }
 
 static void
@@ -814,11 +827,21 @@ wipe_schema(void)
 {
 	int i;
 	rsdb_transaction(dbconn, RSDB_TRANS_START);
+	/* See comment in check_schema(): bandb_table[] duplicates each
+	 * table name in adjacent .perm slots, so the body-side `i++` is
+	 * deliberate. Silence -Wfor-loop-analysis. */
+#if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wfor-loop-analysis"
+#endif
 	for(i = 0; i < BANDB_LAST_TYPE; i++)
 	{
 		rsdb_exec(dbconn, NULL, "DROP TABLE %s", bandb_table[i]);
 		i++;		/* double increment to skip over .perm */
 	}
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#endif
 	rsdb_transaction(dbconn, RSDB_TRANS_END);
 
 	check_schema();

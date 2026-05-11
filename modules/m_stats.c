@@ -50,6 +50,7 @@
 #include "operhash.h"
 #include "scache.h"
 #include "s_log.h"
+#include "s_auth.h"
 
 #ifdef HAVE_STRUCT_MALLINFO
 #include <malloc.h>
@@ -130,6 +131,7 @@ static void stats_servlinks(struct Client *);
 static void stats_ltrace(struct Client *, int, const char **);
 static void stats_ziplinks(struct Client *);
 static void stats_comm(struct Client *);
+static void stats_rbl(struct Client *);
 /* This table contains the possible stats items, in order:
  * stats letter,  function to call, operonly? adminonly?
  * case only matters in the stats letter column.. -- fl_
@@ -160,6 +162,8 @@ static struct StatsStruct stats_cmd_table[] = {
 	{'L', stats_ltrace, 0, 0,},
 	{'m', stats_messages, 0, 0,},
 	{'M', stats_messages, 0, 0,},
+	{'n', stats_rbl, 1, 0,},
+	{'N', stats_rbl, 1, 0,},
 	{'o', stats_oper, 0, 0,},
 	{'O', stats_oper, 0, 0,},
 	{'p', stats_operedup, 0, 0,},
@@ -944,6 +948,22 @@ stats_uptime(struct Client *source_p)
 	sendto_one_numeric(source_p, RPL_STATSCONN,
 			   form_str(RPL_STATSCONN),
 			   MaxConnectionCount, MaxClientCount, Count.totalrestartcount);
+}
+
+static void
+stats_rbl_one(const char *rblname, unsigned long queries,
+              unsigned long matches, unsigned long misses, void *arg)
+{
+	struct Client *source_p = arg;
+	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+			   "n %s queries=%lu matches=%lu misses=%lu",
+			   rblname, queries, matches, misses);
+}
+
+static void
+stats_rbl(struct Client *source_p)
+{
+	rbl_dump_stats(stats_rbl_one, source_p);
 }
 
 struct shared_flags

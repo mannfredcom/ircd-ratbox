@@ -4,10 +4,123 @@ The 2.2 branch will no longer be maintained.
 
 This is the current release version of the 'stable' tree of ircd-ratbox.
 
+If you are upgrading from 3.0.x, please read doc/whats-new-3.1.txt
 If you are upgrading from 2.2, you must read doc/whats-new-3.0.txt
 If you are upgrading from 2.1, you must read doc/whats-new-2.2.txt
 If you are upgrading from 2.0, you must also read doc/whats-new-2.1.txt
 If you are upgrading from 1.x, you must also read doc/whats-new-2.0.txt
+
+-- ircd-ratbox-3.1.0-rc1
+- The name of the executable that is generated is now ircd-ratbox 
+  instead of ircd.  Any crontabs should be updated to reflect this change.  
+  Also you should remove any old executables in the $PREFIX/bin directory
+  named ircd, the install process will not do this for you.
+- Built in DNS RBL support via the blocklist {} configuration option
+- Add ipv6_tun_remap option. This remap transitional IPv6 technologies(teredo,
+  6to4) to their IPv4 addresses for the purpose of channel bans and klines
+- Nicklen is now a runtime configurable option(up to 30 characters)
+  Nicklens beyond 30 will need a recompile as before.
+- Minimum nickname length is settable as well with serverinfo::nicklen_min
+- Add options to configure TLS versions and ECDH support as well. 
+- WHOWAS history length can now be set at runtime with the whowas_length
+  option
+- CERTFP support for connect {}, operator {} and auth{}.  CERTFP acts as an
+  additional gate to these blocks and does not replace password/challenge.
+- Improve memory usage reporting
+- The code is much more reliant on C99 features, gcc 4.x and clang have
+  been tested.  Let us know if another compiler does not compile it.
+- Fix time_t issues on 32bit OpenBSD with 64bit time_t
+- General code cleanups, dead code removal
+- REHASH memory leaks are gone!
+- Add ELIST new ELIST features C and T
+- TESTRBL <ip>: oper-only spot-check of a single IPv4 or IPv6 address
+  against every configured blacklist{} zone. Reports per-zone HIT,
+  MISS, CLEAN (NXDOMAIN), ERROR, or TIMEOUT without affecting any
+  client and without modifying the issuing oper's connection state.
+  /HELP TESTRBL describes the output.
+- STATS n / STATS N (oper-only): per-zone DNSBL counters. One line per
+  configured blacklist{} of the form
+      n <zone> queries=N matches=N misses=N
+  /HELP STATS now lists the letter.
+- blocklist { } accepted as an alias for blacklist { } in ircd.conf
+- map_oper_only=no combined with serverhide::flatten_links=yes now
+  emits a config-load warning, since flatten_links overrides the
+  intended /MAP visibility for non-opers.
+- rblquery_t.queryid widened from uint16_t to uint32_t. The DNS
+  helper IDs are 32-bit; truncation caused queryid mismatches and
+  use-after-free on disconnect after roughly 65k lookups.
+- IPv6 client lookups: rbl_isv6() returns the bit flag (0x2), so the
+  previous "!= true" comparison made every IPv6 client skip every
+  blacklist. Replaced with a proper truthiness check.
+- rbl->refcount is now bumped before lookup_hostname() to handle
+  synchronous failed_resolver callbacks safely.
+- rbl_destroy()/rbl_clear_rbllists() ordering corrected to avoid a
+  stale rb_dlinkDelete on previously-removed list entries during a
+  REHASH while DNS lookups are in flight.
+- TLS 1.3 NewSessionTicket suppression on server contexts. The
+  existing SSL_OP_NO_TICKET flag only covered pre-1.3 stateless
+  tickets; SSL_CTX_set_num_tickets(0) is now also called when built
+  against OpenSSL 1.1.1 or newer (skipped for LibreSSL). Works around
+  stalls observed against ircds linked to early OpenSSL 1.1.1
+  patchlevels with known TLS-1.3 NST/post-handshake races.
+- Raw ERR_error_string format string is no longer leaked into the
+  user-facing SSL quit message.
+- resolver/res.c proc_answer() now bounds-checks rd_length against
+  the end of the packet buffer, fixing a 4- to 16-byte over-read on
+  crafted T_A/T_AAAA/T_CNAME responses.
+- parse_netmask() in src/hostmask.c clamps negative CIDR bit counts
+  to zero, fixing a UB shift count when /-N appeared in DLINE/KLINE/
+  TESTLINE input or in the config file.
+- serverinfo::nicklen now clamps to NICKLEN-1 on overflow and to a
+  sensible minimum on underflow instead of writing the raw configured
+  value into ServerInfo.nicklen, where it could overflow stack/heap
+  nick buffers in mr_nick / m_nick / set_initial_nick.
+- bandb_handle_ban() validates parc before dereferencing parv[]
+  entries
+- linebuf chop-trailing loop guarded against size_t underflow on
+  pathological inputs.
+- failed_resolver callback is now deferred to the next event loop
+  iteration to avoid use-after-free across the dns / s_auth boundary.
+- AWAY message updates (changing an existing away string, not just
+  toggling on/off) are now propagated to peer servers; the previous
+  code only sent the on/off transition.
+- Accept callback no longer fires on a closed fd after rb_set_nb()
+  failure on the newly-accepted socket.
+- call_hook() iterates with RB_DLINK_FOREACH_SAFE so a hook callback
+  that removes itself does not corrupt the iteration.
+- motd_path is preserved across REHASH when the new config omits it,
+  matching the long-standing behaviour of other path settings.
+- free_cachefile() no longer leaks the dlink_node for empty MOTD/help
+  lines.
+- scache_remove() is now called when a server departs, fixing an
+  unbounded heap growth on burst/split-rejoin storms.
+- YESNO command-line option handling no longer writes through a
+  wrong-typed pointer and clobbers neighbouring globals.
+- ipv6_tun_remap matching restored after a regression that disabled
+  ban matching against the remapped IPv4 address; garbage rewrite of
+  the underlying IPv4 sockaddr was also removed.
+
+
+-- ircd-ratbox-3.0.12
+- Minor D-line bugfixes (3.1 backport)
+- Minor linebuf bugfixes (3.1 backport)
+- Compilation support for latest OpenSSL versions (3.1 backport)
+
+
+-- ircd-ratbox-3.0.11
+- Use TLS_client_method for client context
+- Increase SSL handshake flood limit
+
+
+-- ircd-ratbox-3.0.10
+- Fix various minor memory leaks on REHASH
+- Update genssl.sh script to use 2048 bit RSA keys by default
+- Disable SSLv3 
+- Enable support for ECDHE TLS ciphers - prime256v1 is the hard coded 
+  curve selection
+- Fix rehashing ssl related configuration options
+- Make MONITOR actually work again
+
 
 -- ircd-ratbox-3.0.9
 - Some code modernization

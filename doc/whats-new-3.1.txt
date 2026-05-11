@@ -11,10 +11,9 @@ Installation
    Nicklens beyond 30 will need a recompile as before.
  o Minimum nickname length is settable as well with serverinfo::nicklen_min
  
-
 Config
 ------
- o Built in DNS RBL support via the blacklist {} configuration option
+ o Built in DNS RBL support via the blocklist {} configuration option
  o Add ipv6_tun_remap option. This remap transitional IPv6 technologies(teredo,
    6to4) to their IPv4 addresses for the purpose of channel bans and klines
  o Add options to configure TLS versions and ECDH support as well. 
@@ -25,12 +24,14 @@ Config
 
 Misc
 ----
+ o TESTRBL <ip> (oper-only) check of a single IPv4 or IPv6 address
+   against every configured blocklist {} 
+ o STATS n / STATS N (oper-only): per-zone DNSBL counters. One line per
+   configured blocklist {}
  o Improve memory usage reporting
  o The code is much more reliant on C99 features, gcc 4.x and clang have
    been tested.  Let us know if another compiler does not compile it.
- o Fix time_t issues on 32bit OpenBSD with 64bit time_t
  o General code cleanups, dead code removal
- o REHASH memory leaks are gone! 
  o Add ELIST new ELIST features C and T
- 
-  
+ o Various bug fixes and hardening, see RELNOTES for more details.
+
