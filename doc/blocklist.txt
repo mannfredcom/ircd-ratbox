@@ -1,0 +1,176 @@
+blocklist {} setup and verification
+===================================
+
+A `blocklist {}` block tells the ircd to query a DNS-based blocklist
+(DNSBL/RBL) for every connecting client and drop the connection if
+the zone returns a positive listing. K-Line exempt clients are still
+queried but a positive listing is not enforced against them.
+
+(The keyword `blacklist` is also supported as an alias for backward
+compatibility with older pre-beta configs.)
+
+
+Minimal example
+---------------
+
+Lifted from doc/example.conf:
+
+    blocklist "rbl.efnet.org" {
+            match = "1";
+            answer = "Open proxy found: See http://rbl.efnetrbl.org/?i=${ip} for more information.";
+
+            match = "127.0.0.2";
+            answer = "Trojan spreader: http://rbl.efnetrbl.org/?i=${ip} for more information.";
+
+            match = "127.*.3";
+            answer = "Trojan infected client: http://rbl.efnetrbl.org/?i=${ip} for more information.";
+
+            match = "127.0.0.4/32";
+            answer = "TOR exit server: http://rbl.efnetrbl.org/?i=${ip} for more information.";
+
+            match = "5";
+            answer = "Drones / Flooding: http://rbl.efnetrbl.org/?i=${ip} for more information.";
+
+            match_other = yes;
+            match_other_answer = "Your IP address: ${ip} has been banned by DNSBL.";
+            aftype = ipv4;
+    };
+
+Each `match` / `answer` pair documents one listing category. The
+answer string is sent to the rejected client as the disconnect
+reason. The placeholders ${nick} ${ip} ${host} ${dnsbl-host}
+${network-name} are substituted.
+
+
+Options
+-------
+
+  match               - DNS answer fragment to flag against. Accepts
+                        a bare last octet ("1" matches 127.0.0.1),
+                        a full IPv4 ("127.0.0.2"), channel-ban
+                        globbing ("127.*.3"), or CIDR ("127.0.0.4/32").
+                        Repeat with paired `answer` lines for each
+                        category the zone publishes.
+  answer              - Reason string sent to the client (and shown
+                        in operator notices) when the matching
+                        `match` fires.
+  match_other         - yes/no. If yes, any reply that did not match
+                        any of the explicit `match` entries still
+                        counts as a positive listing.
+  match_other_answer  - Reason string for the match_other catch-all.
+  aftype              - ipv4 / ipv6 / both. Some DNSBLs only support
+                        ipv4; that is the default.
+
+See doc/example.conf for the option set in context.
+
+
+Verifying configuration
+-----------------------
+
+After editing ircd.conf:
+
+    /REHASH
+
+Then spot-check a single IP against every configured zone:
+
+    /TESTRBL <ip>
+
+One notice is emitted per zone, prefixed `TESTRBL <ip>: <zone> -`,
+ending with `MATCH reply=...`, `CLEAN (no listing)`, `ERROR`, or
+`TIMEOUT`. A terminator notice is sent once every zone has answered.
+See /HELP TESTRBL for the full output reference.
+
+Finding test IPs: if you do not have a HOPM feed available, as an
+alternative a regularly-refreshed list of IPs known to be listed in 
+major DNSBLs is published at
+
+    https://github.com/mannfredcom/daily-proxy-ips
+
+Picking 3-4 from the IPv4 list (and another 3-4 from the IPv6 list
+if any of your zones have `aftype = ipv6` or `both`) is normally
+enough to see at least one MATCH from rbl.efnet.org and/or dronebl.
+
+
+Monitoring at runtime
+---------------------
+
+    /STATS n           (oper-only)
+
+emits one line per configured zone:
+
+    n <zone> queries=N matches=N misses=N
+
+Watch the queries counter advance under normal load and the
+matches/misses ratio settle. A zone with all `misses` and zero
+`matches` over a long window is either misconfigured (wrong
+zone name, wrong match values) or genuinely sees no listed
+traffic on your server.
+
+
+Converting a HOPM dnsbl block to ircd-ratbox
+--------------------------------------------
+
+HOPM (Hybrid Open Proxy Monitor) is a server bot that performs 
+the same DNSBL screening externally and issues bans. A typical 
+HOPM dnsbl block looks like:
+
+    dnsbl {
+        name           = "dnsbl.dronebl.org";
+        type           = "A record reply";
+        ban_unknown    = no;
+        address_family = ipv4, ipv6;
+
+        reply {
+            2 = "Sample drone";
+            3 = "IRC drone";
+            8 = "Open proxy";
+        };
+
+        kline = "Listed in DroneBL; see https://dronebl.org/lookup?ip=%h";
+    };
+
+Direct mapping into a ratbox `blocklist {}`:
+
+  HOPM key                    ratbox equivalent
+  ------------------------------------------------
+  name = "..."                blocklist "..." {
+  reply { N = "..."; }        match = "N";
+                              answer = "Listed: ...";
+  ban_unknown = yes           match_other = yes;
+                              match_other_answer = "...";
+  ban_unknown = no            match_other = no;        (default)
+  type = "A record reply"     (default in ratbox)
+  type = "A record bitmask"   use CIDR in match
+                              ("127.0.0.0/29" etc.)
+  kline = "Reason..."         use that text in
+                              answer / match_other_answer
+                              (ratbox disconnects rather
+                              than klining)
+
+The above HOPM example translates to:
+
+    blocklist "dnsbl.dronebl.org" {
+            match = "2";
+            answer = "Listed in DroneBL (drone): see https://dronebl.org/lookup?ip=${ip}";
+
+            match = "3";
+            answer = "Listed in DroneBL (IRC drone): see https://dronebl.org/lookup?ip=${ip}";
+
+            match = "8";
+            answer = "Listed in DroneBL (open proxy): see https://dronebl.org/lookup?ip=${ip}";
+
+            match_other = no;
+            match_other_answer = "Listed in DroneBL; see https://dronebl.org/lookup?ip=${ip}";
+            aftype = both;   # ipv4 and ipv6
+    };
+
+Differences worth knowing about:
+
+- HOPM can perform active proxy scanning (HTTP CONNECT, SOCKS, etc.)
+  and this is useful even when the ircd handles the DNSBL checking.
+  Running a HOPM is recommended regardless of ircd configuration.
+- HOPM's substitution token `%h` corresponds to ratbox `${ip}`.
+
+See HOPM page at https://github.com/ircd-hybrid/hopm for more info on
+the software.
+

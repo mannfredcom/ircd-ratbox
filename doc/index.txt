@@ -3,6 +3,8 @@ Here is the overview of the documents in the doc/ directory.
 
 old/CIDR.txt		- Description of CIDR in IPv4
 Tao-of-IRC.940110       - No comment...
+blocklist.txt           - Setting up DNSBL/RBL blocklists, verifying
+                          with /TESTRBL, HOPM dnsbl conversion
 challenge.txt           - Overview of the challenge/response system for
                           obtaining operator status
 example.conf            - An example ircd.conf file describing most of the

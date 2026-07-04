@@ -60,7 +60,6 @@ mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *
 {
 	struct Channel *chptr;
 	struct membership *msptr;
-	rb_dlink_node *ptr;
 
 	/* admins only */
 	if(!IsOperAdmin(source_p))
@@ -76,16 +75,11 @@ mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 	}
 
-	RB_DLINK_FOREACH(ptr, chptr->members.head)
+	if(chptr->members[MEMBER_OP].head != NULL)
 	{
-		msptr = ptr->data;
-
-		if(is_chanop(msptr))
-		{
-			sendto_one(source_p, ":%s NOTICE %s :%s Channel is not opless",
-				   me.name, parv[0], parv[1]);
-			return 0;
-		}
+		sendto_one(source_p, ":%s NOTICE %s :%s Channel is not opless",
+			   me.name, parv[0], parv[1]);
+		return 0;
 	}
 
 	msptr = find_channel_membership(chptr, source_p);
@@ -94,6 +88,8 @@ mo_opme(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 
 	msptr->flags |= CHFL_CHANOP;
+	rb_dlinkMoveNode(&msptr->channode, &chptr->members[MEMBER_NOOP],
+			  &chptr->members[MEMBER_OP]);
 
 	sendto_wallops_flags(UMODE_WALLOP, &me,
 			     "OPME called for [%s] by %s!%s@%s",

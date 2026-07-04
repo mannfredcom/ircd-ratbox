@@ -51,6 +51,7 @@ static int mo_forcejoin(struct Client *client_p, struct Client *source_p,
 			int parc, const char *parv[]);
 static int mo_forcepart(struct Client *client_p, struct Client *source_p,
 			int parc, const char *parv[]);
+static struct Channel *force_create_channel(const char *chname);
 
 struct Message forcejoin_msgtab = {
 	.cmd = "FORCEJOIN", 
@@ -75,6 +76,21 @@ struct Message forcepart_msgtab = {
 mapi_clist_av1 force_clist[] = { &forcejoin_msgtab, &forcepart_msgtab, NULL };
 
 DECLARE_MODULE_AV1(force, NULL, NULL, force_clist, NULL, NULL, "$Revision$");
+
+static struct Channel *
+force_create_channel(const char *chname)
+{
+	struct Channel *chptr;
+
+	chptr = rb_malloc(sizeof(struct Channel));
+	chptr->chname = rb_strndup(chname, CHANNELLEN);
+	chptr->channelts = rb_current_time();
+
+	rb_dlinkAdd(chptr, &chptr->node, &global_channel_list);
+	hash_add(HASH_CHANNEL, chptr->chname, chptr);
+
+	return chptr;
+}
 
 /*
  * m_forcejoin
@@ -194,7 +210,7 @@ mo_forcejoin(struct Client *client_p, struct Client *source_p, int parc, const c
 			return 0;
 		}
 
-		chptr = get_or_create_channel(target_p, newch, NULL);
+		chptr = force_create_channel(newch);
 		add_user_to_channel(chptr, target_p, CHFL_CHANOP);
 
 		/* send out a join, make target_p join chptr */

@@ -89,10 +89,18 @@ mo_clearchan(struct Client *client_p, struct Client *source_p, int parc, const c
 	}
 
 	/* quickly make everyone a peon.. */
-	RB_DLINK_FOREACH(ptr, chptr->members.head)
+	RB_DLINK_FOREACH(ptr, chptr->members[MEMBER_NOOP].head)
 	{
 		msptr = ptr->data;
-		msptr->flags &= ~CHFL_CHANOP | CHFL_VOICE;
+		msptr->flags &= ~CHFL_VOICE;
+	}
+
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->members[MEMBER_OP].head)
+	{
+		msptr = ptr->data;
+		msptr->flags &= ~(CHFL_CHANOP | CHFL_VOICE);
+		rb_dlinkMoveNode(&msptr->channode, &chptr->members[MEMBER_OP],
+				  &chptr->members[MEMBER_NOOP]);
 	}
 
 	sendto_wallops_flags(UMODE_WALLOP, &me,
@@ -128,14 +136,10 @@ mo_clearchan(struct Client *client_p, struct Client *source_p, int parc, const c
 	chptr->mode.mode = MODE_SECRET | MODE_TOPICLIMIT | MODE_INVITEONLY | MODE_NOPRIVMSGS;
 	chptr->mode.key[0] = '\0';
 
-	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->members.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->members[MEMBER_NOOP].head)
 	{
 		msptr = ptr->data;
 		target_p = msptr->client_p;
-
-		/* skip the person we just added.. */
-		if(is_chanop(msptr))
-			continue;
 
 		sendto_channel_local(ALL_MEMBERS, chptr,
 				     ":%s KICK %s %s :CLEARCHAN",

@@ -29,7 +29,7 @@ New Features - A short introduction:
   o Support for global CIDR limits.
   o Connection Throttling. 
 
-- Please see doc/whats-new-3.0.txt for more detailed changes.
+- Please see doc/whats-new-3.1.txt for more detailed changes.
 
 
 Necessary Requirements:
@@ -118,7 +118,7 @@ Feature Specific Requirements:
   Cygwin 1.3+ (static modules, no servlink)
   OpenVMS/Alpha 7.2 (static modules, no servlink)
 
-- Please read doc/whats-new-3.0.txt for information about what is in this release
+- Please read doc/whats-new-3.1.txt for information about what is in this release
 
 - Other files recommended for reading: BUGS, INSTALL
 

@@ -22,7 +22,9 @@ User Modes:
 +x - external   - See remote server connection and split notices
 +y - spy        - See LINKS, STATS (if configured), TRACE notices
 +z - operwall   - See oper generated WALLOPS
++C - cconnext   - Extended client connection/quit notices
 +D - deaf       - Ignore all PRIVMSG's sent to channels
++S - service    - Marks client as a network service (ENABLE_SERVICES build only)
 +Z - operspy    - See operspy notices
 
 Channel Modes:
@@ -48,6 +50,7 @@ Channel Modes:
 +v - voice      - Can speak in a moderated channel, and is exempt from flood 
                   restrictions
 +S - ssl only 	- Requires SSL/TLS connections to join
+
 The third part of the 004 numeric lists channel modes that require arguments.
 Currently these are bkloveIh.
 

@@ -952,12 +952,18 @@ stats_uptime(struct Client *source_p)
 
 static void
 stats_rbl_one(const char *rblname, unsigned long queries,
-              unsigned long matches, unsigned long misses, void *arg)
+              unsigned long matches, unsigned long misses,
+              unsigned long cancelled, unsigned long pending, void *arg)
 {
 	struct Client *source_p = arg;
+	/* queries == matches + misses + cancelled + pending, by construction:
+	 * every dispatched lookup sits in exactly one bucket -- pending while
+	 * the DNS reply is in flight, then resolved as a match or miss, or
+	 * cancelled if the client went away first -- so the four outcome
+	 * counters always sum back to queries. */
 	sendto_one_numeric(source_p, RPL_STATSDEBUG,
-			   "n %s queries=%lu matches=%lu misses=%lu",
-			   rblname, queries, matches, misses);
+			   "n %s queries=%lu matches=%lu misses=%lu cancelled=%lu pending=%lu",
+			   rblname, queries, matches, misses, cancelled, pending);
 }
 
 static void

@@ -25,8 +25,6 @@
 
 #include <string.h>
 
-extern char *crypt();
-
 static int m_mkpasswd(struct Client *client_p, struct Client *source_p,
 		      int parc, const char *parv[]);
 static int mo_mkpasswd(struct Client *client_p, struct Client *source_p,

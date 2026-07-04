@@ -101,7 +101,7 @@ ms_svinfo(struct Client *client_p, struct Client *source_p, int parc, const char
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Link %s notable TS delta"
-				     " (my TS=% " RBTT_FMT ", their TS=%" RBTT_FMT ", delta=%ld)",
+				     " (my TS=%" RBTT_FMT ", their TS=%" RBTT_FMT ", delta=%ld)",
 				     source_p->name, rb_current_time(), theirtime, deltat);
 	}
 

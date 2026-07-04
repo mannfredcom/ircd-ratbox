@@ -30,6 +30,7 @@ exercise for the reader.
 ircd-ratbox-3.x now has several major changes over previous version that you
 will notice right away.
 
+  - Built-in RBL checks for connecting clients
   - Storage of bans in a database, versus the old flat-files.
   - SSL Client support.
   - SSL Only Channel support.
@@ -37,7 +38,7 @@ will notice right away.
   - Force Nick Change (FNC).
   - Support for global CIDR limits.
   - Connection Throttling.
-  - Please see [whats-new-3.0.txt](file://doc/whats-new-3.0.txt) for more detailed changes.
+  - Please see [whats-new-3.1.txt](file://doc/whats-new-3.1.txt) for more detailed changes.
 
 ### Necessary Requirements ###
   - A supported platform (look below)
@@ -55,24 +56,13 @@ will notice right away.
 
 
 ## Supported Distributions
-This code should compile without any warnings on:
- - FreeBSD 6.x/7.x/8.x/9.x *
- - Gentoo & Gentoo Hardened (stable archs)
- - CentOS / Redhat Enterprise 5/6
- - SUSE Linux Enterprise 12**
- - openSUSE Evergreen, Leap 42.1, and Tumbleweed**
- - Debian Etch,
- - OpenSolaris 2008.x?
- - Solaris 10 sparc.
+Known to build and run cleanly on:
+- Ubuntu 22.04 LTS, 24.04 LTS
+- AlmaLinux 8, AlmaLinux 9
+- FreeBSD 13.x, 14.x, 15.x
 
-\* FREEBSD USERS: if you are compiling with ipv6 you may experience
-  problems with ipv4 due to the way the socket code is written.  To
-  fix this you must: "sysctl net.inet6.ip6.v6only=0"
-
-** SUSE RPM's can be installed from here:
-    https://software.opensuse.org/download.html?project=home%3Adubkat&package=ircd-ratbox
-
-
+Other POSIX-y systems with autotools, OpenSSL or LibreSSL, and a
+recent C99 compiler should also build; reports welcome.
 
 ## For More Information....
 - To report bugs in ircd-ratbox, send the bug report to ircd-ratbox@lists.ratbox.org
@@ -100,32 +90,7 @@ This code should compile without any warnings on:
   Errors from adns causing the ircd to refuse to start up are often related
   to permission problems on these files.
 
-- There is a mailing list for ircd-ratbox.  To subscribe to this list
-  visit http://lists.ratbox.org/cgi-bin/mailman/listinfo/ircd-ratbox
-  Note that this list also gets the commit emails from the CVS server.
-
-- SOLARIS USERS: this code appears to tickle a bug in older gcc and
-  egcs ONLY on 64-bit Solaris7.  gcc-2.95 and SunPro C on 64bit should
-  work fine, and any gcc or SunPro compiled on 32bit.
-
-- DARWIN AND MACOS X USERS: You must be using at least the December 2001
-  Development Tools from Apple to build ircd-ratbox with shared modules.
-  Before then you MUST disable shared modules, as we do not have the proper
-  flags for cc(1) prior to that point to produce shared modules.
-
-- It probably does not compile on AIX, IRIX or libc5 Linux.
-
-- TESTED PLATFORMS:  The code has been tested on the following platforms, and
-  is known to run properly.
-  FreeBSD 6.x/7.x
-  Linux glibc-2.6, glibc-2.7
-  Solaris 2.6/7/8
-  OpenBSD 2.8
-  NetBSD 1.4
-  Cygwin 1.3+ (static modules, no servlink)
-  OpenVMS/Alpha 7.2 (static modules, no servlink)
-
-- Please read doc/whats-new-3.0.txt for information about what is in this release
+- Please read doc/whats-new-3.1.txt for information about what is in this release
 
 - Other files recommended for reading: BUGS, INSTALL
 

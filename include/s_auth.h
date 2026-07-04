@@ -74,6 +74,8 @@ typedef void (*rbl_stats_cb)(const char *rblname,
                              unsigned long queries,
                              unsigned long matches,
                              unsigned long misses,
+                             unsigned long cancelled,
+                             unsigned long pending,
                              void *arg);
 void rbl_dump_stats(rbl_stats_cb cb, void *arg);
 
